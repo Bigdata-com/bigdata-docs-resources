@@ -1,1 +1,13 @@
 .DS_STORE
+
+# Virtual environments
+.venv/
+**/.venv/
+.venv/bin/
+**/.venv/bin/
+venv/
+**/venv/
+
+# Environment variables
+.env
+**/.env

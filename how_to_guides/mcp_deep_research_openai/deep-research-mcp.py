@@ -4,6 +4,7 @@ from openai import OpenAI
 import os
 import json
 import time
+from pathlib import Path
 from datetime import datetime
 from collections import Counter
 import markdown
@@ -224,9 +225,14 @@ full_html = f'''
 </html>
 '''
 
+# Create output directory if it doesn't exist
+script_dir = Path(__file__).parent
+output_dir = script_dir / 'output'
+output_dir.mkdir(exist_ok=True)
+
 # Generate PDF filename with timestamp
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-pdf_filename = f"research_report_{timestamp}.pdf"
+pdf_filename = output_dir / f"research_report_{timestamp}.pdf"
 
 # Create PDF
 HTML(string=full_html).write_pdf(pdf_filename, stylesheets=[css_style])
