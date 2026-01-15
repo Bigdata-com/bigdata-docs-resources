@@ -10,7 +10,6 @@ A Python script that retrieves and visualizes theme volume data from the Bigdata
 - Overlays weekly average trends for better pattern recognition
 - Generates high-resolution PNG charts with theme-specific filenames
 - Supports custom date ranges and themes via command-line arguments
-- Comprehensive logging for debugging and monitoring
 
 ## Prerequisites
 
