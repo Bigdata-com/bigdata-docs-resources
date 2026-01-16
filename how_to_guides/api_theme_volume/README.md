@@ -41,10 +41,10 @@ Matplotlib should work out of the box with the pip installation.
 
 ### 1. Clone or download the repository
 
-```bash
-cd /path/to/your/directory
-```
+### 2. Navigate to the project
 
+```bash
+cd </path/to/your/directory>/api_theme_volume
 ### 2. Create a virtual environment (recommended)
 
 ```bash
