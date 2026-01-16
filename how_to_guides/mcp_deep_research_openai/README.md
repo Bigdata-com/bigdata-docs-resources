@@ -1,6 +1,6 @@
 # Deep Research MCP Script
 
-A Python script that uses OpenAI's o3-deep-research model with Bigdata.com's MCP (Model Context Protocol) server to generate comprehensive equity research reports with full visibility into MCP tool calls.
+A Python script that uses OpenAI's o3-deep-research model with Bigdata.com's MCP (Model Context Protocol) server to generate comprehensive equity research reports.
 
 ## Features
 
