@@ -1,3 +1,4 @@
+import logging
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -11,6 +12,7 @@ import markdown
 from weasyprint import HTML, CSS
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 # Read Bigdata API key from environment
 BIGDATA_API_KEY = os.getenv("BIGDATA_API_KEY")
@@ -21,8 +23,11 @@ client = OpenAI()
 start_time = time.time()
 TOPIC = "You are a senior equity analyst preparing for an upc..."
 logger.info(f"Launching deep research with the following topic \n {TOPIC}")
+
+# Create background response - returns immediately while processing continues
 resp = client.responses.create(
     model="o3-deep-research-2025-06-26",
+    background=True,
     input="""You are a senior equity analyst preparing for an upcoming earnings call. Please provide a comprehensive earnings preview and analysis for Micron.
 
 Cover:
@@ -44,6 +49,32 @@ Deliverable Format: Present findings as a concise, actionable brief suitable for
         }
     ]
 )
+
+# Poll for completion when using background mode
+print("=" * 80)
+print("BACKGROUND PROCESSING")
+print("=" * 80)
+print(f"\nResponse ID: {resp.id}")
+print(f"Initial status: {resp.status}")
+
+poll_count = 0
+while resp.status in ("queued", "in_progress"):
+    poll_count += 1
+    elapsed = time.time() - start_time
+    # Format elapsed time as mm:ss for readability
+    mins, secs = divmod(int(elapsed), 60)
+    elapsed_str = f"{mins}m {secs:02d}s" if mins > 0 else f"{secs}s"
+    print(f"\r  Polling... ({poll_count}) | Status: {resp.status} | Waiting: {elapsed_str}    ", end="", flush=True)
+    time.sleep(10)  # Wait 10 seconds between polls
+    resp = client.responses.retrieve(resp.id)
+
+print(f"\n\nFinal status: {resp.status}")
+
+if resp.status == "failed":
+    print(f"Error: {getattr(resp, 'error', 'Unknown error')}")
+    exit(1)
+elif resp.status == "incomplete":
+    print(f"Response incomplete. Reason: {getattr(resp, 'incomplete_details', 'Unknown')}")
 
 end_time = time.time()
 elapsed_time = end_time - start_time
