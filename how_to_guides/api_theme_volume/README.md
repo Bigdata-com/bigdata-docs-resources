@@ -18,7 +18,7 @@ A Python script that retrieves and visualizes theme volume data from the Bigdata
 
 ### System Dependencies
 
-Matplotlib requires some system libraries for chart generation.
+Your system needs to have the following libraries installed for the correct execution of the project.
 
 **Ubuntu/Debian:**
 
@@ -39,12 +39,20 @@ Matplotlib should work out of the box with the pip installation.
 
 ## Setup
 
-### 1. Clone or download the repository
+### 1. Download the project
 
-### 2. Navigate to the project
+Clone the repository
 
 ```bash
-cd </path/to/your/directory>/api_theme_volume
+git clone https://github.com/Bigdata-com/bigdata-docs-resources.git
+```
+
+and navigate to the project folder
+
+```bash
+cd bigdata-docs-resources/how_to_guides/api_theme_volume
+```
+
 ### 2. Create a virtual environment (recommended)
 
 ```bash

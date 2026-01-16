@@ -2,6 +2,8 @@
 
 A Python script that uses OpenAI's o3-deep-research model with Bigdata.com's MCP (Model Context Protocol) server to generate comprehensive equity research reports.
 
+The LLM with the current o3 model will take approximately 30 minutes to generate the report with full inline source attribution.
+
 ## Features
 
 - Generates detailed equity research reports using AI
@@ -18,7 +20,7 @@ A Python script that uses OpenAI's o3-deep-research model with Bigdata.com's MCP
 
 ### System Dependencies
 
-WeasyPrint requires some system libraries for PDF generation.
+Your system needs to have the following libraries installed for the correct execution of the project.
 
 **Ubuntu/Debian:**
 
@@ -38,10 +40,19 @@ Follow the [WeasyPrint installation guide](https://doc.courtbouillon.org/weasypr
 
 ## Setup
 
-### 1. Clone or download the repository
+### 1. Download the project
+
+Clone the repository
 
 ```bash
-cd /path/to/your/directory
+git clone https://github.com/Bigdata-com/bigdata-docs-resources.git
+```
+
+and navigate to the project folder
+
+```bash
+cd bigdata-docs-resources/how_to_guides/mcp_deep_research_openai
+```
 ```
 
 ### 2. Create a virtual environment (recommended)
@@ -99,6 +110,9 @@ Run the script:
 python deep-research-mcp.py
 ```
 
+The LLM with the current o3 model will take approximately 30 minutes to generate the report with full inline source attribution.
+
+
 ### Customizing the Research Query
 
 To change the research topic, edit the `input` parameter in the `resp = client.responses.create()` call in `deep-research-mcp.py`. The current prompt requests a Micron earnings preview, but you can modify it to research any topic supported by the Bigdata.com MCP.
@@ -144,6 +158,8 @@ Ensure your `.env` file exists and contains a valid `OPENAI_API_KEY`.
 Ensure your `.env` file contains a valid `BIGDATA_API_KEY`.
 
 ### WeasyPrint errors
+
+Your system needs to have certain libraries installed for the correct execution of the project.
 
 If you encounter errors during PDF generation, ensure you have installed the required system dependencies (see Prerequisites section).
 
