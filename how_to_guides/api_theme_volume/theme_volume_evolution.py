@@ -298,6 +298,7 @@ def create_chart(dates: List[datetime], documents: List[int], chunks: List[int],
     logger.info(f"Chart saved as: {output_filename}")
     
     # Display the chart
+    logger.info("Execution completed. Displaying the chart")
     plt.show()
 
 
