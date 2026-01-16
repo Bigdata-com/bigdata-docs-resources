@@ -19,7 +19,8 @@ client = OpenAI()
 
 # Track response time
 start_time = time.time()
-
+TOPIC = "You are a senior equity analyst preparing for an upc..."
+logger.info(f"Launching deep research with the following topic \n {TOPIC}")
 resp = client.responses.create(
     model="o3-deep-research-2025-06-26",
     input="""You are a senior equity analyst preparing for an upcoming earnings call. Please provide a comprehensive earnings preview and analysis for Micron.
