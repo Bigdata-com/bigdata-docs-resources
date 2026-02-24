@@ -194,37 +194,10 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "https://s3.amazonaws.com/com.ravenpack.search-batch-output.smart-topics-prod-nvirginia/input/7868759d-6bff-45d1-9fa5-b2b74c87233b/input.jsonl?AWSAccessKeyId=ASIASXXLECCPEVYTRW2K&Signature=5hhQLGtW8DUYdJNr8fLsh3wRhUk%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEBMaCXVzLWVhc3QtMSJHMEUCIC4Q1gAAzUxth0gv5hIJ9RxTRayYgXcDCG%2FFavK5MAigAiEA6NV8I2yLisjSXhVlTh72wXYLw8jo0uRzdbhrD5BYMzAqkQMI3P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwxODgzOTc5MTYzMTgiDOMui0KuKVa88NFCzCrlAuD2TNlL0d5cwxNYq97zS5wCjjY3EHpx2mhNocb17nAmTlRrGZPp8Dz0YCQSzzbZTcsL51cH6Q%2FOrm14JMnbLCRT0FQdX0%2B1kHba0kmyVuNkHoz3Ks8PUToTY9GoXl4zudDYsf5nWgvK98fz7lkA21GJCmxJHlr7PohHHGQDi9wBW%2B7j9YGD1xjUPl81vWAMRLAaypZYQGNxC9OQbgVJMHJmYPyJur2wHXmr09UDLecn%2FkYAoGjz7B9UIZ1AyikFyezXvr4zeYFvHbvROB6qKKwXlhf4EOdNQP2bHDFBU1F0PsZwArvqwMD0nxkZ0CbbPJIROz2Iqk3dmbB7MmylBUbB3D2tI2bORymz%2FMl0Bq3bug8bN6l5phAfe6fui%2FlWoHKQhhvAF3TZjogWFCDqq%2BYhxEA7VM2vWhprgPRTNocyoqdaRg4eIBAFwV28pFrTblhU2eChM2GVXlQiOftnkNnUyCQ8lTCw3vDMBjqeASvD2%2BoLG27NsYTfdhvBlFXQ1ce6py7mdRygEaHeSolvwQKspyngaxBfVw6DV0An4G%2FN9jlfwVuQxeOkU2SoZwfPXjLchVTCTNLZDWEh6o%2FAtXPxlOdVSKqWQOHTss9NccID1Q84w8%2BHSHdNMbmXLhqXyzRr0EEpW%2BAJsSL635CqiatHiH3dt7xK4i6upTAgHni8XAn0bcURC%2FIirhEE&Expires=1771846979",
-                  "protocol": "https",
+                  "raw": "{{output_file_url}}",
                   "host": [
-                    "s3",
-                    "amazonaws",
-                    "com"
-                  ],
-                  "path": [
-                    "com.ravenpack.search-batch-output.smart-topics-prod-nvirginia",
-                    "input",
-                    "7868759d-6bff-45d1-9fa5-b2b74c87233b",
-                    "input.jsonl"
-                  ],
-                  "query": [
-                    {
-                      "key": "AWSAccessKeyId",
-                      "value": "ASIASXXLECCPEVYTRW2K"
-                    },
-                    {
-                      "key": "Signature",
-                      "value": "5hhQLGtW8DUYdJNr8fLsh3wRhUk%3D"
-                    },
-                    {
-                      "key": "x-amz-security-token",
-                      "value": "IQoJb3JpZ2luX2VjEBMaCXVzLWVhc3QtMSJHMEUCIC4Q1gAAzUxth0gv5hIJ9RxTRayYgXcDCG%2FFavK5MAigAiEA6NV8I2yLisjSXhVlTh72wXYLw8jo0uRzdbhrD5BYMzAqkQMI3P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwxODgzOTc5MTYzMTgiDOMui0KuKVa88NFCzCrlAuD2TNlL0d5cwxNYq97zS5wCjjY3EHpx2mhNocb17nAmTlRrGZPp8Dz0YCQSzzbZTcsL51cH6Q%2FOrm14JMnbLCRT0FQdX0%2B1kHba0kmyVuNkHoz3Ks8PUToTY9GoXl4zudDYsf5nWgvK98fz7lkA21GJCmxJHlr7PohHHGQDi9wBW%2B7j9YGD1xjUPl81vWAMRLAaypZYQGNxC9OQbgVJMHJmYPyJur2wHXmr09UDLecn%2FkYAoGjz7B9UIZ1AyikFyezXvr4zeYFvHbvROB6qKKwXlhf4EOdNQP2bHDFBU1F0PsZwArvqwMD0nxkZ0CbbPJIROz2Iqk3dmbB7MmylBUbB3D2tI2bORymz%2FMl0Bq3bug8bN6l5phAfe6fui%2FlWoHKQhhvAF3TZjogWFCDqq%2BYhxEA7VM2vWhprgPRTNocyoqdaRg4eIBAFwV28pFrTblhU2eChM2GVXlQiOftnkNnUyCQ8lTCw3vDMBjqeASvD2%2BoLG27NsYTfdhvBlFXQ1ce6py7mdRygEaHeSolvwQKspyngaxBfVw6DV0An4G%2FN9jlfwVuQxeOkU2SoZwfPXjLchVTCTNLZDWEh6o%2FAtXPxlOdVSKqWQOHTss9NccID1Q84w8%2BHSHdNMbmXLhqXyzRr0EEpW%2BAJsSL635CqiatHiH3dt7xK4i6upTAgHni8XAn0bcURC%2FIirhEE"
-                    },
-                    {
-                      "key": "Expires",
-                      "value": "1771846979"
-                    }
-                  ]
+                    "{{output_file_url}}"
+                  ]                  
                 }
               },
               "response": []
