@@ -1,0 +1,276 @@
+{
+  "info": {
+    "_postman_id": "5288afa5-b1c2-4c37-b43b-357f0a77b887",
+    "name": "Bigdata.com APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37724809"
+  },
+  "item": [
+    {
+      "name": "Search Service",
+      "item": [
+        {
+          "name": "Batch Search",
+          "item": [
+            {
+              "name": "Create pre-signed URL to upload the batch",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse JSON response and save `presigned_url` to environment when present",
+                      "pm.test(\"Response is JSON (or empty)\", function () {",
+                      "  // Allow empty responses (some endpoints may return 204)",
+                      "  const body = pm.response.text();",
+                      "  if (!body) {",
+                      "    pm.expect(true).to.be.true;",
+                      "    return;",
+                      "  }",
+                      "",
+                      "  pm.expect(function () {",
+                      "    JSON.parse(body);",
+                      "  }).to.not.throw();",
+                      "});",
+                      "",
+                      "let data;",
+                      "try {",
+                      "  const body = pm.response.text();",
+                      "  data = body ? JSON.parse(body) : null;",
+                      "} catch (e) {",
+                      "  data = null;",
+                      "}",
+                      "",
+                      "const url = data && typeof data === 'object' ? data.presigned_url : undefined;",
+                      "",
+                      "if (typeof url === 'string' && url.trim().length > 0) {",
+                      "  pm.environment.set('presigned_url', url);",
+                      "}",
+                      "",
+                      "const batch_id = data && typeof data === 'object' ? data.batch_id : undefined;",
+                      "",
+                      "if (typeof batch_id === 'string' && batch_id.trim().length > 0) {",
+                      "  pm.environment.set('batch_id', batch_id);",
+                      "}",
+                      "",
+                      "",
+                      "",
+                      "pm.test(\"presigned_url env var is set when presigned_url is present\", function () {",
+                      "  if (typeof url === 'string' && url.trim().length > 0) {",
+                      "    pm.expect(pm.environment.get('presigned_url')).to.eql(url);",
+                      "  } else {",
+                      "    // If not present, don't fail the run; just assert it's absent/unchanged is acceptable.",
+                      "    pm.expect(true).to.be.true;",
+                      "  }",
+                      "});",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{BIGDATA_API_URL}}/v1/search/batches",
+                  "host": [
+                    "{{BIGDATA_API_URL}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "search",
+                    "batches"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Upload search batch",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {
+                  "content-type": true
+                }
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/jsonl",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "file",
+                  "file": {
+                    "src": "/C:/Users/osanchez/Desktop/batch_job_file.jsonl"
+                  }
+                },
+                "url": {
+                  "raw": "{{presigned_url}}",
+                  "host": [
+                    "{{presigned_url}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get batch status",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse JSON response and save `presigned_url` to environment when present\r",
+                      "pm.test(\"Response is JSON (or empty)\", function () {\r",
+                      "  // Allow empty responses (some endpoints may return 204)\r",
+                      "  const body = pm.response.text();\r",
+                      "  if (!body) {\r",
+                      "    pm.expect(true).to.be.true;\r",
+                      "    return;\r",
+                      "  }\r",
+                      "\r",
+                      "  pm.expect(function () {\r",
+                      "    JSON.parse(body);\r",
+                      "  }).to.not.throw();\r",
+                      "});\r",
+                      "\r",
+                      "let data;\r",
+                      "try {\r",
+                      "  const body = pm.response.text();\r",
+                      "  data = body ? JSON.parse(body) : null;\r",
+                      "} catch (e) {\r",
+                      "  data = null;\r",
+                      "}\r",
+                      "\r",
+                      "const url = data && typeof data === 'object' ? data.output_file_url : undefined;\r",
+                      "\r",
+                      "if (typeof url === 'string' && url.trim().length > 0) {\r",
+                      "  pm.environment.set('output_file_url', url);\r",
+                      "}\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BIGDATA_API_URL}}/v1/search/batches/:batch_id",
+                  "host": [
+                    "{{BIGDATA_API_URL}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "search",
+                    "batches",
+                    ":batch_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "batch_id",
+                      "value": "{{batch_id}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get response",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://s3.amazonaws.com/com.ravenpack.search-batch-output.smart-topics-prod-nvirginia/input/7868759d-6bff-45d1-9fa5-b2b74c87233b/input.jsonl?AWSAccessKeyId=ASIASXXLECCPEVYTRW2K&Signature=5hhQLGtW8DUYdJNr8fLsh3wRhUk%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEBMaCXVzLWVhc3QtMSJHMEUCIC4Q1gAAzUxth0gv5hIJ9RxTRayYgXcDCG%2FFavK5MAigAiEA6NV8I2yLisjSXhVlTh72wXYLw8jo0uRzdbhrD5BYMzAqkQMI3P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwxODgzOTc5MTYzMTgiDOMui0KuKVa88NFCzCrlAuD2TNlL0d5cwxNYq97zS5wCjjY3EHpx2mhNocb17nAmTlRrGZPp8Dz0YCQSzzbZTcsL51cH6Q%2FOrm14JMnbLCRT0FQdX0%2B1kHba0kmyVuNkHoz3Ks8PUToTY9GoXl4zudDYsf5nWgvK98fz7lkA21GJCmxJHlr7PohHHGQDi9wBW%2B7j9YGD1xjUPl81vWAMRLAaypZYQGNxC9OQbgVJMHJmYPyJur2wHXmr09UDLecn%2FkYAoGjz7B9UIZ1AyikFyezXvr4zeYFvHbvROB6qKKwXlhf4EOdNQP2bHDFBU1F0PsZwArvqwMD0nxkZ0CbbPJIROz2Iqk3dmbB7MmylBUbB3D2tI2bORymz%2FMl0Bq3bug8bN6l5phAfe6fui%2FlWoHKQhhvAF3TZjogWFCDqq%2BYhxEA7VM2vWhprgPRTNocyoqdaRg4eIBAFwV28pFrTblhU2eChM2GVXlQiOftnkNnUyCQ8lTCw3vDMBjqeASvD2%2BoLG27NsYTfdhvBlFXQ1ce6py7mdRygEaHeSolvwQKspyngaxBfVw6DV0An4G%2FN9jlfwVuQxeOkU2SoZwfPXjLchVTCTNLZDWEh6o%2FAtXPxlOdVSKqWQOHTss9NccID1Q84w8%2BHSHdNMbmXLhqXyzRr0EEpW%2BAJsSL635CqiatHiH3dt7xK4i6upTAgHni8XAn0bcURC%2FIirhEE&Expires=1771846979",
+                  "protocol": "https",
+                  "host": [
+                    "s3",
+                    "amazonaws",
+                    "com"
+                  ],
+                  "path": [
+                    "com.ravenpack.search-batch-output.smart-topics-prod-nvirginia",
+                    "input",
+                    "7868759d-6bff-45d1-9fa5-b2b74c87233b",
+                    "input.jsonl"
+                  ],
+                  "query": [
+                    {
+                      "key": "AWSAccessKeyId",
+                      "value": "ASIASXXLECCPEVYTRW2K"
+                    },
+                    {
+                      "key": "Signature",
+                      "value": "5hhQLGtW8DUYdJNr8fLsh3wRhUk%3D"
+                    },
+                    {
+                      "key": "x-amz-security-token",
+                      "value": "IQoJb3JpZ2luX2VjEBMaCXVzLWVhc3QtMSJHMEUCIC4Q1gAAzUxth0gv5hIJ9RxTRayYgXcDCG%2FFavK5MAigAiEA6NV8I2yLisjSXhVlTh72wXYLw8jo0uRzdbhrD5BYMzAqkQMI3P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwxODgzOTc5MTYzMTgiDOMui0KuKVa88NFCzCrlAuD2TNlL0d5cwxNYq97zS5wCjjY3EHpx2mhNocb17nAmTlRrGZPp8Dz0YCQSzzbZTcsL51cH6Q%2FOrm14JMnbLCRT0FQdX0%2B1kHba0kmyVuNkHoz3Ks8PUToTY9GoXl4zudDYsf5nWgvK98fz7lkA21GJCmxJHlr7PohHHGQDi9wBW%2B7j9YGD1xjUPl81vWAMRLAaypZYQGNxC9OQbgVJMHJmYPyJur2wHXmr09UDLecn%2FkYAoGjz7B9UIZ1AyikFyezXvr4zeYFvHbvROB6qKKwXlhf4EOdNQP2bHDFBU1F0PsZwArvqwMD0nxkZ0CbbPJIROz2Iqk3dmbB7MmylBUbB3D2tI2bORymz%2FMl0Bq3bug8bN6l5phAfe6fui%2FlWoHKQhhvAF3TZjogWFCDqq%2BYhxEA7VM2vWhprgPRTNocyoqdaRg4eIBAFwV28pFrTblhU2eChM2GVXlQiOftnkNnUyCQ8lTCw3vDMBjqeASvD2%2BoLG27NsYTfdhvBlFXQ1ce6py7mdRygEaHeSolvwQKspyngaxBfVw6DV0An4G%2FN9jlfwVuQxeOkU2SoZwfPXjLchVTCTNLZDWEh6o%2FAtXPxlOdVSKqWQOHTss9NccID1Q84w8%2BHSHdNMbmXLhqXyzRr0EEpW%2BAJsSL635CqiatHiH3dt7xK4i6upTAgHni8XAn0bcURC%2FIirhEE"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "1771846979"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "{{BIGDATA_API_KEY}}",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "x-api-key",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
