@@ -30,31 +30,11 @@ API_BASE_URL = os.getenv("BIGDATA_API_BASE_URL", "https://api.bigdata.com")
 DOCUMENTS_PATH = "/contents/v1/documents"
 
 
-def _env_int(name: str, default: int) -> int:
-    val = os.getenv(name)
-    if val is None:
-        return default
-    try:
-        return int(val)
-    except ValueError:
-        return default
-
-
-def _env_float(name: str, default: float) -> float:
-    val = os.getenv(name)
-    if val is None:
-        return default
-    try:
-        return float(val)
-    except ValueError:
-        return default
-
-
-RATE_LIMIT_PER_MINUTE = _env_int("BIGDATA_RATE_LIMIT_PER_MINUTE", 500)
-RATE_LIMIT_SAFETY_MARGIN = _env_int("BIGDATA_RATE_LIMIT_SAFETY_MARGIN", 20)
+RATE_LIMIT_PER_MINUTE = int(os.getenv("BIGDATA_RATE_LIMIT_PER_MINUTE", 500))
+RATE_LIMIT_SAFETY_MARGIN = int(os.getenv("BIGDATA_RATE_LIMIT_SAFETY_MARGIN", 20))
 MAX_REQUESTS_PER_MINUTE = max(1, RATE_LIMIT_PER_MINUTE - RATE_LIMIT_SAFETY_MARGIN)
-POLL_INTERVAL_SEC = _env_float("BIGDATA_POLL_INTERVAL_SEC", 10.0)
-UPLOAD_MAX_RETRIES = _env_int("BIGDATA_UPLOAD_MAX_RETRIES", 5)
+POLL_INTERVAL_SEC = float(os.getenv("BIGDATA_POLL_INTERVAL_SEC", 10.0))
+UPLOAD_MAX_RETRIES = int(os.getenv("BIGDATA_UPLOAD_MAX_RETRIES", 5))
 
 UPLOAD_DONE = "UPLOAD_DONE"
 UPLOAD_ERROR = "UPLOAD_ERROR"
@@ -131,12 +111,22 @@ def _post_document(
         "tags": tags or [],
         "share_with_org": share_with_org,
     }
-    resp = requests.post(url, json=payload, headers=_api_headers(api_key), timeout=30)
     try:
+        resp = requests.post(url, json=payload, headers=_api_headers(api_key), timeout=30)
+        resp.raise_for_status()
         data = resp.json() if resp.text else None
-    except Exception:
+        return data, resp.status_code
+    except requests.HTTPError as e:
         data = None
-    return data, resp.status_code
+        if e.response is not None and e.response.text:
+            try:
+                data = e.response.json()
+            except Exception:
+                pass
+        return data, e.response.status_code if e.response is not None else 0
+    except requests.RequestException as e:
+        logging.warning("POST document failed: %s", e)
+        return None, 0
 
 
 def _put_file_to_url(upload_url: str, file_path: str) -> tuple[bool, int]:
@@ -148,13 +138,15 @@ def _put_file_to_url(upload_url: str, file_path: str) -> tuple[bool, int]:
         with open(file_path, "rb") as f:
             payload = f.read()
         response = requests.put(upload_url, data=payload, headers={}, timeout=120)
-        if response.status_code >= 400:
-            logging.warning(
-                "PUT response status=%s body=%s",
-                response.status_code,
-                (response.text or "")[:300],
-            )
-        return 200 <= response.status_code < 300, response.status_code
+        response.raise_for_status()
+        return True, response.status_code
+    except requests.HTTPError as e:
+        logging.warning(
+            "PUT response status=%s body=%s",
+            e.response.status_code if e.response else 0,
+            (e.response.text or "")[:300] if e.response else "",
+        )
+        return False, e.response.status_code if e.response is not None else 0
     except requests.RequestException as e:
         logging.debug("PUT exception: %s", e)
         return False, 0
@@ -166,12 +158,22 @@ def _get_document_status(
     """GET document by id. Returns (json_response, status_code)."""
     rate_limiter.acquire()
     url = f"{API_BASE_URL.rstrip('/')}{DOCUMENTS_PATH}/{content_id}"
-    resp = requests.get(url, headers={"X-API-KEY": api_key}, timeout=30)
     try:
+        resp = requests.get(url, headers={"X-API-KEY": api_key}, timeout=30)
+        resp.raise_for_status()
         data = resp.json() if resp.text else None
-    except Exception:
+        return data, resp.status_code
+    except requests.HTTPError as e:
         data = None
-    return data, resp.status_code
+        if e.response is not None and e.response.text:
+            try:
+                data = e.response.json()
+            except Exception:
+                pass
+        return data, e.response.status_code if e.response is not None else 0
+    except requests.RequestException as e:
+        logging.warning("GET document status failed: %s", e)
+        return None, 0
 
 
 def _poll_until_completed(
