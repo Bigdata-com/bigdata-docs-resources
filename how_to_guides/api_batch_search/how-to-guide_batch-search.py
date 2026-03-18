@@ -40,7 +40,7 @@ BIGDATA_API_KEY = os.environ.get("BIGDATA_API_KEY", "")
 
 # Polling configuration
 POLL_INTERVAL_SECONDS = 10
-MAX_POLL_ATTEMPTS = 120  # 20 minutes max wait time
+MAX_POLL_ATTEMPTS = 8640  # 24h max wait time
 
 
 # =============================================================================
