@@ -29,7 +29,6 @@ Fast charging
 Battery management systems
 Second-life batteries
 Electric vehicle
-EV
 Plug-in hybrid
 PHEV
 Zero-emission vehicle
