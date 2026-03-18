@@ -1,15 +1,14 @@
 # Download Document
 
-A Python script to download entire documents using Bigdata.com APIs. The script handles two possible response types from the API.
+A Python script to download entire documents using the [Bigdata Fetch document API](https://docs.bigdata.com/api-reference/search/fetch-document). The API returns a time-limited pre-signed URL; the script fetches that URL to retrieve the full document in annotated JSON (metadata, content, analytics).
 
 ## Features
 
-- Downloads documents from the Bigdata API
-- Automatically handles two response types:
-  - Returns JSON directly
-  - Returns a pre-signed URL that requires a second call to fetch the actual document
-- Saves documents with descriptive filenames based on document ID and headline
+- Downloads documents via **GET /v1/documents/{document_id}**
+- Follows the two-step flow: obtain pre-signed URL, then GET the URL for the full document (URL expires after 24 hours)
+- Saves documents with descriptive filenames: `<document_id>_<headline>.json`
 - Sanitizes filenames for filesystem compatibility
+- Optional base URL via `BIGDATA_API_BASE_URL`
 
 ## Requirements
 
@@ -19,18 +18,22 @@ A Python script to download entire documents using Bigdata.com APIs. The script 
 ## Setup
 
 1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
 
-2. Create a `.env` file in the project directory with your API key:
-```
-BIGDATA_API_KEY=your_api_key_here
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Create a `.env` file in the script directory with your API key:
+
+   ```
+   BIGDATA_API_KEY=your_api_key_here
+   ```
+
+   Optional: set `BIGDATA_API_BASE_URL` (default: `https://api.bigdata.com`).
 
 ## Usage
 
-Run the script with a document ID as an argument:
+Run the script with a 32-character hex document ID:
 
 ```bash
 python download_entire_document.py <document_id>
@@ -38,46 +41,44 @@ python download_entire_document.py <document_id>
 
 ### Example
 
+Using document ID `776769957735667D2F01F695EF4F1231`:
+
 ```bash
-python download_entire_document.py 0105A1520E8594CB6B0B8505CB0090AA
+python download_entire_document.py 776769957735667D2F01F695EF4F1231
+```
+
+This produces the JSON file:
+
+```
+776769957735667D2F01F695EF4F1231_Tesla_Inc_Q3_2025_Earnings_Call_on_Oct_22,_2025_-_Transcript.json
 ```
 
 ## Output
 
-The script saves the downloaded document as a JSON file with the following naming convention:
+The script saves the downloaded document as a JSON file:
 
 ```
 <document_id>_<headline>.json
 ```
 
-For example:
-```
-0105A1520E8594CB6B0B8505CB0090AA_VISA_INC._files_FORM_10-Q_for_Q1,_FY_2024_on_Jan_26,_2024.json
-```
-
-The headline is extracted from `document.content.title.text`. If no headline is found, the filename will use "document" as a fallback.
-
-The JSON file is saved with proper formatting (indented, UTF-8 encoded) for easy reading.
+The headline is taken from `document.content.title.text`. If missing, the filename uses `"document"` as a fallback. The file is written as indented, UTF-8 encoded JSON.
 
 ## How It Works
 
-1. Reads the `BIGDATA_API_KEY` from the `.env` file
-2. Sends a GET request to `https://api.bigdata.com/documents/{document_id}` with the API key in the `x-api-key` header
-3. Checks the response:
-   - If the response contains a `url` key, it's a pre-signed S3 URL that requires a second request to fetch the document
-   - Otherwise, the JSON document is directly in the response
-4. Extracts the headline from `document.content.title.text`
-5. Sanitizes the headline for filesystem use (removes invalid characters, replaces spaces with underscores)
-6. Saves the document to a JSON file named `<document_id>_<headline>.json`
+1. Reads `BIGDATA_API_KEY` from `.env` (and optionally `BIGDATA_API_BASE_URL`).
+2. Sends **GET** `{API_BASE_URL}/v1/documents/{document_id}` with the **X-API-KEY** header.
+3. The response contains a **url** field (pre-signed URL). The script sends a second **GET** to that URL to fetch the full document JSON.
+4. Extracts the headline from `document.content.title.text`, sanitizes it for the filesystem, and saves the JSON as `<document_id>_<headline>.json`.
 
 ## Error Handling
 
-The script will raise an error if:
-- The `BIGDATA_API_KEY` is not found in the environment
-- The API request fails (network errors, authentication errors, etc.)
-- The document ID is invalid
+The script exits with an error if:
+
+- `BIGDATA_API_KEY` is not set
+- The document ID is not a 32-character hex string
+- The API request fails (e.g. 400, 403, 404, 5xx)
+- The pre-signed URL request fails or the response is missing the `url` field
 
 ## License
 
 This project is provided as-is for use with the Bigdata API.
-
