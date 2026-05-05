@@ -1,0 +1,6 @@
+Name,listing_type,webpage,mic,ticker,isin,cusip,sedol,ravenpack_id,country,industry,description
+Micron Technology Inc.,PUBLIC,,,,US5951121038,,,49BBBC,US,Semiconductors,"Micron Technology Inc., together with its subsidiaries, manufactures and markets semiconductor solutions worldwide. The company was founded in October 1978."
+Figma Inc.,PUBLIC,,,,,316841105,,BA9E0C,US,Internet Services,"Figma Inc. is an open design company that provides a collaborative interface design tool that enables the entire team design process to happen in one online tool. It was founded on October 19, 2012."
+NVIDIA Corporation,PUBLIC,,,,,,2379504,E09E2B,US,Semiconductors,"NVIDIA Corp., incorporated in April 1993, designs, develops, and markets three dimensional (3D) graphics processors and related software. The Company offers products that provides interactive 3D graphics to the mainstream personal computer market as well as system on a chip units for the mobile computing and automotive market."
+Anthropic,PRIVATE,,,,,,,IWGWUR,US,Software,"Anthropic PBC is an AI safety and research company that is working to build reliable, interpretable, and steerable AI systems. The company was incorporated in 2021."
+Mistral AI,PRIVATE,,,,,,,IUNEGY,FR,Software,"Mistral AI SAS operates as a generative artificial intelligence company. The company was incorporated on April 28, 2023."

@@ -11,3 +11,6 @@ venv/
 # Environment variables
 .env
 **/.env
+
+# Python bytecode (get_company_ids)
+**/**/__pycache__/
