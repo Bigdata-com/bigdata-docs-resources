@@ -6,6 +6,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 import os
+from market_identifier_validation import validate_market_identifiers
 
 
 # Configure logging
@@ -26,7 +27,7 @@ api_key = os.getenv("BIGDATA_API_KEY")
 # Bigdata Services API configuration
 BIGDATA_BASE_URL = "https://api.bigdata.com/v1/knowledge-graph/companies"
 MAX_IDS_PER_REQUEST = 500
-PRIVATE_COMPANY_THREAD_POOL_SIZE = 10
+PRIVATE_COMPANY_THREAD_POOL_SIZE = 5
 
 
 def chunk_values(values, chunk_size=MAX_IDS_PER_REQUEST):
@@ -54,8 +55,12 @@ def _kg_post_chunk(url, headers, values_chunk, endpoint_label, chunk_index):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        identifiers_preview = ", ".join(values_chunk[:10])
+        if len(values_chunk) > 10:
+            identifiers_preview = f"{identifiers_preview}, ... (total {len(values_chunk)})"
         logger.error(
-            f"{endpoint_label} chunk {chunk_index} request failed ({len(values_chunk)} IDs): {e}"
+            f"{endpoint_label} chunk {chunk_index} request failed "
+            f"({len(values_chunk)} IDs; identifiers: {identifiers_preview}): {e}"
         )
         if getattr(e, "response", None) is not None:
             logger.error(f"Response status: {e.response.status_code}")
@@ -200,23 +205,45 @@ def search_private_company_ravenpack(query, log_context=""):
 
 def _resolve_one_private_company(task):
     """
-    Worker for parallel PRIVATE lookups. task is
-    (idx, total, query_text, company) where company is unused by the API call
-    but kept for traceability in exceptions.
+    Worker for parallel PRIVATE lookups. task is (idx, total, company).
 
-    Returns (idx, query_text, company, info, error) with error set only on failure.
+    When both webpage and name are present, search by webpage first
+    (query + types PRIVATE). If that returns no match, retry with the
+    company name. If only one of them is present, use that as the sole query.
+
+    Returns (idx, query_used_for_display, company, info, error) with error set only on failure.
     """
-    idx, total, query_text, company = task
+    idx, total, company = task
+    webpage = (company.get('webpage') or '').strip()
+    name = (company.get('name') or '').strip()
+    log_ctx = f"[{idx}/{total}]"
     try:
-        info = search_private_company_ravenpack(
-            query_text, log_context=f"[{idx}/{total}]"
-        )
-        return idx, query_text, company, info, None
+        info = None
+        query_used = ''
+
+        if webpage:
+            info = search_private_company_ravenpack(webpage, log_context=log_ctx)
+            if info:
+                query_used = webpage
+
+        if info is None and name and (not webpage or name != webpage):
+            info = search_private_company_ravenpack(name, log_context=log_ctx)
+            if info:
+                query_used = name
+
+        if not query_used:
+            # No match: report the last query attempted (name after webpage fallback).
+            if webpage and name and name != webpage:
+                query_used = name
+            else:
+                query_used = webpage or name
+
+        return idx, query_used, company, info, None
     except Exception as api_error:
         logger.exception(
             f"PRIVATE API lookup failed unexpectedly for {company.get('name')!r}: {api_error}"
         )
-        return idx, query_text, company, None, api_error
+        return idx, webpage or name, company, None, api_error
 
 
 def read_companies_csv(input_file_path):
@@ -232,13 +259,14 @@ def read_companies_csv(input_file_path):
 
     Returns:
         tuple: (companies_by_isin, companies_by_cusip, companies_by_listing,
-                companies_by_sedol, companies_private)
+                companies_by_sedol, companies_private, companies_pre_resolved)
     """
     companies_by_isin = []
     companies_by_cusip = []
     companies_by_listing = []
     companies_by_sedol = []
     companies_private = []
+    companies_pre_resolved = []
 
     try:
         with open(input_file_path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -286,6 +314,15 @@ def read_companies_csv(input_file_path):
                 isin = cleaned_row.get('isin', '')
                 cusip = cleaned_row.get('cusip', '')
                 sedol = cleaned_row.get('sedol', '')
+                listing_value = f"{mic}:{ticker}" if (mic and ticker) else ''
+                country = cleaned_row.get('country', '') or cleaned_row.get('Country', '')
+                industry = cleaned_row.get('industry', '') or cleaned_row.get('Industry', '')
+                description = cleaned_row.get('description', '') or cleaned_row.get('Description', '')
+                ravenpack_id = (
+                    cleaned_row.get('ravenpack_id', '')
+                    or cleaned_row.get('Ravenpack_ID', '')
+                    or cleaned_row.get('ravenpack_Id', '')
+                )
 
                 company_record = {
                     'name': name,
@@ -296,21 +333,74 @@ def read_companies_csv(input_file_path):
                     'isin': isin,
                     'cusip': cusip,
                     'sedol': sedol,
+                    'country': country,
+                    'industry': industry,
+                    'description': description,
+                    'ravenpack_id': ravenpack_id,
                 }
 
+                if ravenpack_id:
+                    companies_pre_resolved.append(company_record)
+                    continue
+
                 if listing_type == 'PRIVATE':
-                    query_text = webpage if webpage else name
-                    if not query_text:
+                    if not webpage and not name:
                         logger.warning(
                             f"Row {row_num}: PRIVATE row needs a non-empty webpage or name for query. Skipping."
                         )
                         continue
-                    company_record['_private_query'] = query_text
                     companies_private.append(company_record)
-                    logger.info(f"Row {row_num}: Added PRIVATE company — query: {query_text!r}")
+                    logger.info(
+                        f"Row {row_num}: Added PRIVATE company — webpage: {webpage!r}, name: {name!r}"
+                    )
                     continue
 
-                # PUBLIC: identifier-based resolution
+                # PUBLIC: identifier-based resolution (single identifier per row)
+                validation_result = validate_market_identifiers(
+                    isin=isin,
+                    cusip=cusip,
+                    sedol=sedol,
+                    listing=listing_value,
+                )
+                if not validation_result.is_valid:
+                    logger.warning(
+                        f"Row {row_num}: invalid market identifier formats detected; "
+                        "invalid identifiers will be ignored."
+                    )
+                    for error in validation_result.errors:
+                        logger.warning(f"Row {row_num}: {error}")
+
+                if isin and len(isin) != 12:
+                    logger.warning(
+                        f"Row {row_num}: skipping invalid ISIN {isin!r} (expected length 12)."
+                    )
+                    isin = ''
+                    company_record['isin'] = ''
+                if cusip and len(cusip) != 9:
+                    logger.warning(
+                        f"Row {row_num}: skipping invalid CUSIP {cusip!r} (expected length 9)."
+                    )
+                    cusip = ''
+                    company_record['cusip'] = ''
+                if sedol and len(sedol) != 7:
+                    logger.warning(
+                        f"Row {row_num}: skipping invalid SEDOL {sedol!r} (expected length 7)."
+                    )
+                    sedol = ''
+                    company_record['sedol'] = ''
+                if listing_value:
+                    has_colon = ':' in listing_value
+                    mic_part, ticker_part = (listing_value.split(':', 1) + [''])[:2] if has_colon else ('', '')
+                    if (not has_colon) or (not mic_part.strip()) or (not ticker_part.strip()):
+                        logger.warning(
+                            f"Row {row_num}: skipping invalid LISTING {listing_value!r} "
+                            "(expected MIC:TICKER)."
+                        )
+                        mic = ''
+                        ticker = ''
+                        company_record['mic'] = ''
+                        company_record['ticker'] = ''
+
                 has_isin = bool(isin)
                 has_cusip = bool(cusip)
                 has_sedol = bool(sedol)
@@ -322,23 +412,34 @@ def read_companies_csv(input_file_path):
                     )
                     continue
 
+                selected_identifier_count = sum([
+                    has_isin,
+                    has_cusip,
+                    has_sedol,
+                    has_mic_ticker,
+                ])
+                if selected_identifier_count > 1:
+                    logger.info(
+                        f"Row {row_num}: multiple PUBLIC identifiers present; applying priority "
+                        "ISIN > CUSIP > SEDOL > mic:ticker and using only one."
+                    )
+
                 if has_isin:
                     companies_by_isin.append(company_record)
-                    logger.info(f"Row {row_num}: Added to ISIN array - ISIN: {isin}")
-
-                if has_cusip:
+                    logger.info(f"Row {row_num}: Added to ISIN array (priority selected) - ISIN: {isin}")
+                elif has_cusip:
                     companies_by_cusip.append(company_record)
-                    logger.info(f"Row {row_num}: Added to CUSIP array - CUSIP: {cusip}")
-
-                if has_sedol:
+                    logger.info(f"Row {row_num}: Added to CUSIP array (priority selected) - CUSIP: {cusip}")
+                elif has_sedol:
                     companies_by_sedol.append(company_record)
-                    logger.info(f"Row {row_num}: Added to SEDOL array - SEDOL: {sedol}")
-
-                if has_mic_ticker:
+                    logger.info(f"Row {row_num}: Added to SEDOL array (priority selected) - SEDOL: {sedol}")
+                elif has_mic_ticker:
                     listing_id = f"{mic}:{ticker}"
                     company_record['listing_id'] = listing_id
                     companies_by_listing.append(company_record)
-                    logger.info(f"Row {row_num}: Added to listing array - Listing ID: {listing_id}")
+                    logger.info(
+                        f"Row {row_num}: Added to listing array (priority selected) - Listing ID: {listing_id}"
+                    )
 
         logger.info("Successfully processed CSV file. Summary:")
         logger.info(f"  - PRIVATE companies (query): {len(companies_private)}")
@@ -346,6 +447,7 @@ def read_companies_csv(input_file_path):
         logger.info(f"  - Companies by CUSIP: {len(companies_by_cusip)}")
         logger.info(f"  - Companies by SEDOL: {len(companies_by_sedol)}")
         logger.info(f"  - Companies by listing (mic:ticker): {len(companies_by_listing)}")
+        logger.info(f"  - Pre-resolved companies (input ravenpack_id): {len(companies_pre_resolved)}")
 
         return (
             companies_by_isin,
@@ -353,6 +455,7 @@ def read_companies_csv(input_file_path):
             companies_by_listing,
             companies_by_sedol,
             companies_private,
+            companies_pre_resolved,
         )
         
     except FileNotFoundError:
@@ -390,6 +493,15 @@ def write_output_csv(all_companies, output_file_path):
                 v = company.get(key)
                 return '' if v is None else str(v)
 
+            def _sanitize_description_for_csv(value):
+                """
+                Remove commas from descriptions to prevent delimiter-like content
+                in downstream systems that do not handle quoted CSV fields well.
+                """
+                if value is None:
+                    return ''
+                return str(value).replace(',', ' ')
+
             # Write company data
             for company in all_companies:
                 writer.writerow({
@@ -404,7 +516,7 @@ def write_output_csv(all_companies, output_file_path):
                     'ravenpack_id': _csv_cell(company, 'ravenpack_id'),
                     'country': _csv_cell(company, 'country'),
                     'industry': _csv_cell(company, 'industry'),
-                    'description': _csv_cell(company, 'description'),
+                    'description': _sanitize_description_for_csv(company.get('description')),
                 })
         
         logger.info(f"Successfully wrote {len(all_companies)} companies to {output_file_path}")
@@ -658,6 +770,7 @@ def main():
             companies_by_listing,
             companies_by_sedol,
             companies_private,
+            companies_pre_resolved,
         ) = read_companies_csv(input_file)
 
         print("\nProcessing complete!")
@@ -666,6 +779,7 @@ def main():
         print(f"Companies by CUSIP: {len(companies_by_cusip)}")
         print(f"Companies by SEDOL: {len(companies_by_sedol)}")
         print(f"Companies by listing: {len(companies_by_listing)}")
+        print(f"Companies pre-resolved from input ravenpack_id: {len(companies_pre_resolved)}")
         
         # Collect all unique companies for output
         all_companies = []
@@ -688,11 +802,22 @@ def main():
                     identifiers.append(f"sedol:{company['sedol']}")
                 if company.get('mic') and company.get('ticker'):
                     identifiers.append(f"listing:{company['mic']}:{company['ticker']}")
-                company_key = f"PUBLIC|{'|'.join(sorted(identifiers))}"
+                if identifiers:
+                    company_key = f"PUBLIC|{'|'.join(sorted(identifiers))}"
+                else:
+                    company_key = (
+                        f"PUBLIC|name:{company.get('name', '')}"
+                        f"|webpage:{company.get('webpage', '')}"
+                        f"|rpid:{company.get('ravenpack_id', '')}"
+                    )
 
             if company_key not in seen_companies:
                 seen_companies.add(company_key)
                 all_companies.append(company)
+
+        # Include rows where ravenpack_id was already present in the input file
+        for company in companies_pre_resolved:
+            add_company_if_unique(company)
         
         # Search for ravenpack_id using ISIN codes
         if companies_by_isin:
@@ -835,8 +960,7 @@ def main():
             )
             tasks = []
             for idx, company in enumerate(companies_private, start=1):
-                query_text = company.pop('_private_query', None) or company.get('webpage') or company.get('name')
-                tasks.append((idx, total_private, query_text, company))
+                tasks.append((idx, total_private, company))
 
             with ThreadPoolExecutor(max_workers=PRIVATE_COMPANY_THREAD_POOL_SIZE) as executor:
                 # map preserves result order matching input order
