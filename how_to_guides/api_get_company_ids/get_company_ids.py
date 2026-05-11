@@ -6,7 +6,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 import os
-from market_identifier_validation import validate_market_identifiers
+from market_identifier_validation import validate_market_identifier
 
 
 # Configure logging
@@ -355,45 +355,39 @@ def read_companies_csv(input_file_path):
                     )
                     continue
 
-                # PUBLIC: identifier-based resolution (single identifier per row)
-                validation_result = validate_market_identifiers(
-                    isin=isin,
-                    cusip=cusip,
-                    sedol=sedol,
-                    listing=listing_value,
-                )
-                if not validation_result.is_valid:
-                    logger.warning(
-                        f"Row {row_num}: invalid market identifier formats detected; "
-                        "invalid identifiers will be ignored."
-                    )
-                    for error in validation_result.errors:
-                        logger.warning(f"Row {row_num}: {error}")
-
-                if isin and len(isin) != 12:
-                    logger.warning(
-                        f"Row {row_num}: skipping invalid ISIN {isin!r} (expected length 12)."
-                    )
-                    isin = ''
-                    company_record['isin'] = ''
-                if cusip and len(cusip) != 9:
-                    logger.warning(
-                        f"Row {row_num}: skipping invalid CUSIP {cusip!r} (expected length 9)."
-                    )
-                    cusip = ''
-                    company_record['cusip'] = ''
-                if sedol and len(sedol) != 7:
-                    logger.warning(
-                        f"Row {row_num}: skipping invalid SEDOL {sedol!r} (expected length 7)."
-                    )
-                    sedol = ''
-                    company_record['sedol'] = ''
-                if listing_value:
-                    has_colon = ':' in listing_value
-                    mic_part, ticker_part = (listing_value.split(':', 1) + [''])[:2] if has_colon else ('', '')
-                    if (not has_colon) or (not mic_part.strip()) or (not ticker_part.strip()):
+                # PUBLIC: validate each non-empty identifier once
+                if isin:
+                    r = validate_market_identifier(isin, "ISIN")
+                    if not r.is_valid:
                         logger.warning(
-                            f"Row {row_num}: skipping invalid LISTING {listing_value!r} "
+                            f"Row {row_num}: skipping invalid ISIN {r.value!r} (expected length 12)."
+                        )
+                        isin = ''
+                        company_record['isin'] = ''
+
+                if cusip:
+                    r = validate_market_identifier(cusip, "CUSIP")
+                    if not r.is_valid:
+                        logger.warning(
+                            f"Row {row_num}: skipping invalid CUSIP {r.value!r} (expected length 9)."
+                        )
+                        cusip = ''
+                        company_record['cusip'] = ''
+
+                if sedol:
+                    r = validate_market_identifier(sedol, "SEDOL")
+                    if not r.is_valid:
+                        logger.warning(
+                            f"Row {row_num}: skipping invalid SEDOL {r.value!r} (expected length 7)."
+                        )
+                        sedol = ''
+                        company_record['sedol'] = ''
+
+                if listing_value:
+                    r = validate_market_identifier(listing_value, "LISTING")
+                    if not r.is_valid:
+                        logger.warning(
+                            f"Row {row_num}: skipping invalid LISTING {r.value!r} "
                             "(expected MIC:TICKER)."
                         )
                         mic = ''

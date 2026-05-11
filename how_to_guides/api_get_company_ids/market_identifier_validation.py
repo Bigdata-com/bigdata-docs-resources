@@ -5,68 +5,73 @@ validated before they are queued for Knowledge Graph lookup requests.
 """
 
 from dataclasses import dataclass
+from typing import Literal
+
+IdentifierType = Literal["ISIN", "CUSIP", "SEDOL", "LISTING", "UNKNOWN"]
+
+_EXPECTED_LENGTHS: dict[str, int] = {
+    "ISIN": 12,
+    "CUSIP": 9,
+    "SEDOL": 7,
+}
 
 
 @dataclass
 class MarketIdentifierValidation:
-    """Validation result for supported market identifiers."""
+    """Validation result for a single market identifier."""
 
     is_valid: bool
-    errors: list[str]
+    identifier_type: IdentifierType
+    value: str
 
 
-def validate_market_identifiers(
-    isin: str = "",
-    cusip: str = "",
-    sedol: str = "",
-    listing: str = "",
+def validate_market_identifier(
+    value: str,
+    expected_type: Literal["ISIN", "CUSIP", "SEDOL", "LISTING"],
 ) -> MarketIdentifierValidation:
-    """Validate ISIN/CUSIP/SEDOL/listing formats.
+    """Validate a single market identifier against *expected_type*.
 
-    Rules:
-    - ISIN length must be exactly 12 characters.
-    - CUSIP length must be exactly 9 characters.
-    - SEDOL length must be exactly 7 characters.
-    - Listing must contain ":" between MIC and ticker (e.g., XNAS:AAPL).
+    The function strips whitespace from *value* and then checks:
+    - ISIN  -- length must be exactly 12.
+    - CUSIP -- length must be exactly 9.
+    - SEDOL -- length must be exactly 7.
+    - LISTING -- must contain ``":"`` with non-empty MIC and ticker parts.
 
-    Empty values are treated as "not provided" and therefore valid.
+    Returns ``is_valid=True`` with *identifier_type* echoing *expected_type*
+    on success, or ``is_valid=False`` with ``identifier_type="UNKNOWN"`` on
+    failure (including empty strings).
     """
+    identifier = (value or "").strip()
 
-    errors: list[str] = []
-
-    isin = (isin or "").strip()
-    cusip = (cusip or "").strip()
-    sedol = (sedol or "").strip()
-    listing = (listing or "").strip()
-
-    if isin and len(isin) != 12:
-        errors.append(
-            f"ISIN must be length 12 (got {len(isin)}): {isin!r}"
+    if not identifier:
+        return MarketIdentifierValidation(
+            is_valid=False, identifier_type="UNKNOWN", value=""
         )
 
-    if cusip and len(cusip) != 9:
-        errors.append(
-            f"CUSIP must be length 9 (got {len(cusip)}): {cusip!r}"
-        )
-
-    if sedol and len(sedol) != 7:
-        errors.append(
-            f"SEDOL must be length 7 (got {len(sedol)}): {sedol!r}"
-        )
-
-    if listing:
-        if ":" not in listing:
-            errors.append(
-                f"LISTING must contain ':' between MIC and ticker: {listing!r}"
+    if expected_type in _EXPECTED_LENGTHS:
+        expected_len = _EXPECTED_LENGTHS[expected_type]
+        if len(identifier) != expected_len:
+            return MarketIdentifierValidation(
+                is_valid=False, identifier_type="UNKNOWN", value=identifier
             )
-        else:
-            mic, ticker = listing.split(":", 1)
-            if not mic.strip() or not ticker.strip():
-                errors.append(
-                    f"LISTING must include non-empty MIC and ticker: {listing!r}"
-                )
+        return MarketIdentifierValidation(
+            is_valid=True, identifier_type=expected_type, value=identifier
+        )
+
+    if expected_type == "LISTING":
+        if ":" not in identifier:
+            return MarketIdentifierValidation(
+                is_valid=False, identifier_type="UNKNOWN", value=identifier
+            )
+        mic, ticker = identifier.split(":", 1)
+        if not mic.strip() or not ticker.strip():
+            return MarketIdentifierValidation(
+                is_valid=False, identifier_type="UNKNOWN", value=identifier
+            )
+        return MarketIdentifierValidation(
+            is_valid=True, identifier_type="LISTING", value=identifier
+        )
 
     return MarketIdentifierValidation(
-        is_valid=(len(errors) == 0),
-        errors=errors,
+        is_valid=False, identifier_type="UNKNOWN", value=identifier
     )
