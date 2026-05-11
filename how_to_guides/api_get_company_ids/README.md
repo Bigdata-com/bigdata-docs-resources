@@ -2,115 +2,86 @@
 
 ## Overview
 
-This script demonstrates how to resolve **RavenPack entity IDs** (RavenPack IDs) for **private** and **public** companies using the [Bigdata.com](https://bigdata.com) Knowledge Graph Companies API.
+Resolves **RavenPack entity IDs** for companies using the [Bigdata.com](https://bigdata.com) Knowledge Graph Companies API. Companies are read from a CSV input file and results are written to a CSV output file. Built-in rate limiting (400 requests/minute) prevents API throttling.
 
-You can use a company’s RavenPack ID to narrow searches or queries across Bigdata Services so you only retrieve information tied to that company.
+The script supports two modes:
 
-**Resolution rules**
-
-- **PRIVATE** companies: the script queries the knowledge graph using the `**webpage`** URL when it is present; otherwise it uses the company `**name**`. The API restricts matches to private-company types.
-- **PUBLIC** companies: the script resolves IDs from market identifiers you supply—**MIC and ticker** together (sent as `mic:ticker` to the listing endpoint), or **ISIN**, **CUSIP**, or **SEDOL**. A public row must include at least one of: ISIN, CUSIP, SEDOL, or both MIC and ticker.
-
-Public identifier lookups are batched (up to 500 IDs per request). Each private company uses one API request per row, but those requests run in parallel with **up to 10 worker threads** (`PRIVATE_COMPANY_THREAD_POOL_SIZE`).
-
-**Output**
-
-Results are written to `**output/company_ids.csv`**. Each row includes the input fields plus `**ravenpack_id**`, `**country**`, `**industry**`, and `**description**` when the API returns them.
-
-If a company cannot be resolved—because of a network or API error, or because it is not present in the RavenPack Knowledge Graph—the `**ravenpack_id**` field is left **blank** (empty in the CSV).
-
-**Tip (retries after network issues)**  
-The output CSV is valid as a **new input file** (extra columns such as `ravenpack_id` are ignored when reading). The script **does not** skip rows that already have a `ravenpack_id`—it issues lookups for every row in the file. To retry **only** companies that failed or were missing from the graph, **filter** the output to rows with an empty `ravenpack_id`, keep the same identifier columns, run the script on that subset, then merge those results back into your full list (or replace the previous output for those rows).
+- **public** -- resolves IDs from market identifiers (ISIN, CUSIP, SEDOL, or MIC:ticker). Requests are batched (up to 500 IDs per request).
+- **private** -- resolves IDs by querying the company `webpage` (preferred) or `name`. Each company triggers one API request; lookups run in parallel (20 threads).
 
 ## Prerequisites
 
 - Python 3.7+
-- Required Python packages (install via pip):
+- Install dependencies:
   ```bash
   pip install -r requirements.txt
   ```
-- Bigdata API key (set in `.env` file as `BIGDATA_API_KEY`)
-
-## Setup
-
-1. Clone or download this repository.
-2. From this directory (`how_to_guides/api_get_company_ids/`), create a `.env` file with your API key (or ensure `.env` is on the path used when you run the script):
+- Set your API key in a `.env` file:
   ```
-   BIGDATA_API_KEY=your_api_key_here
+  BIGDATA_API_KEY=your_api_key_here
   ```
-3. Ensure the `logs` directory exists if you want file logging to succeed on first run (`mkdir -p logs`).
-4. Ensure you have the required input file (see Input Files section).
 
-## Input Files
+## Input
 
-### `input/company_universe.csv`
+The script reads a CSV file where each row is a company to resolve. All column headers listed below **must** be present in the CSV (the script validates headers on startup), but individual cell values can be empty.
 
-A UTF-8 CSV listing companies to resolve in the RavenPack Knowledge Graph.
+### Public companies (`input/public_companies.csv`)
 
-**Required columns**
+| Column   | Description                                      |
+|----------|--------------------------------------------------|
+| `name`   | Company name (for display only, not used to resolve) |
+| `isin`   | ISIN identifier (12 characters)                  |
+| `cusip`  | CUSIP identifier (9 characters)                  |
+| `sedol`  | SEDOL identifier (7 characters)                  |
+| `mic`    | Market Identifier Code (e.g. `XNAS`)             |
+| `ticker` | Ticker symbol (e.g. `AAPL`)                      |
 
-- `**listing_type`**: `PUBLIC` or `PRIVATE` (case-insensitive after trim).
-- For **PRIVATE**: non-empty `**webpage`** and/or `**name**` (webpage is preferred as the query when set).
-- For **PUBLIC**: at least one of `**isin`**, `**cusip**`, `**sedol**`, or both `**mic**` and `**ticker**`.
+At least one identifier per row is needed for resolution. When multiple are present the script tries them in priority order: **ISIN > CUSIP > SEDOL > MIC:ticker**. Once a company is resolved by a higher-priority identifier, lower ones are skipped.
 
-**Optional / alternate header names**
-
-- Company name: `name` or `Name`.
-- Listing type: `listing_type`, `Listing_Type`, or `listing_Type`.
-- Webpage: `webpage` or `Webpage`.
-
-Rows with missing or invalid `listing_type`, or missing required identifiers for the listing type, are skipped with a warning in the log.
-
-**Example**
+Example:
 
 ```csv
-name,listing_type,webpage,mic,ticker,isin,cusip,sedol
-Anthropic,PRIVATE,,,,,,
-Mistral AI,PRIVATE,,,,,,
-Micron Technology Inc.,PUBLIC,,,,US5951121038,,
-NVIDIA Corporation,PUBLIC,,,,,,2379504
-Figma Inc.,PUBLIC,,,,,316841105,
+name,mic,ticker,isin,cusip,sedol
+Apple Inc.,XNAS,AAPL,US0378331005,,
+NVIDIA Corporation,,,,,2379504
 ```
 
-## Run
+### Private companies (`input/private_companies.csv`)
 
-From this folder:
+| Column   | Description                                      |
+|----------|--------------------------------------------------|
+| `name`   | Company name                                     |
+| `webpage` | Company website URL (preferred for resolution)  |
+
+The script tries `webpage` first; if empty or not found, it falls back to `name`.
+
+Example:
+
+```csv
+name,webpage
+Anthropic,https://www.anthropic.com
+Mistral AI,
+```
+
+## Usage
 
 ```bash
-python get_company_ids.py input/company_universe.csv
+python get_company_ids.py public  input/public_companies.csv
+python get_company_ids.py private input/private_companies.csv
 ```
 
-The first argument is the path to your input CSV (any path is allowed).
+## Output
 
-**Logs**
+Results are written to `output/` as a CSV that contains all input columns plus the resolved fields:
 
-- Console: INFO-level messages.
-- File: `logs/company_ids.log` (if the `logs` directory exists).
+| Column        | Description                          |
+|---------------|--------------------------------------|
+| `ravenpack_id` | Resolved RavenPack entity ID (empty if not found) |
+| `country`     | Country of the company               |
+| `industry`    | Industry classification              |
+| `description` | Short company description            |
 
-### Example output
+Output files:
 
-```bash
-2026-05-05 21:23:59,353 - __main__ - INFO - Successfully wrote 5 companies to output/company_ids.csv
-✓ Successfully created output/company_ids.csv
-
-Summary:
-  - Total companies processed: 5
-  - Companies with ravenpack_id: 5
-  - Companies without ravenpack_id: 0
-```
-
-### Output file: `output/company_ids.csv`
-
-Columns written:
-
-
-| Column                                               | Description                                |
-| ---------------------------------------------------- | ------------------------------------------ |
-| `Name`                                               | Company name                               |
-| `listing_type`                                       | `PUBLIC` or `PRIVATE`                      |
-| `webpage`, `mic`, `ticker`, `isin`, `cusip`, `sedol` | As provided in the input                   |
-| `ravenpack_id`                                       | Resolved ID, or empty if not found / error |
-| `country`, `industry`, `description`                 | Knowledge Graph metadata when available    |
-
-
-The `output` directory is created automatically if it does not exist.
+- `output/public_company_ids.csv`
+- `output/private_company_ids.csv`
