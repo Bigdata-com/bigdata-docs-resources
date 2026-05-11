@@ -2,12 +2,12 @@
 
 ## Overview
 
-Resolves **RavenPack entity IDs** for companies using the [Bigdata.com](https://bigdata.com) Knowledge Graph Companies API. Companies are read from a CSV input file and results are written to a CSV output file. Built-in rate limiting (400 requests/minute) prevents API throttling.
+You can resolve a `ravenpack_id` with a single API call. This how-to guide shows how to resolve both **public** and **private** companies in bulk from a CSV file.
 
-The script supports two modes:
+- **Public companies** can be resolved by any market identifier: ISIN, CUSIP, SEDOL, or a MIC + ticker pair (e.g. `XNAS:AAPL`). The API accepts up to 500 identifiers per request, so a large portfolio can be resolved in just a few calls.
+- **Private companies** are resolved by their `webpage` URL or `name`. This is a heavier operation -- the API resolves only one company per request -- so the script parallelizes lookups across 20 threads.
 
-- **public** -- resolves IDs from market identifiers (ISIN, CUSIP, SEDOL, or MIC:ticker). Requests are batched (up to 500 IDs per request).
-- **private** -- resolves IDs by querying the company `webpage` (preferred) or `name`. Each company triggers one API request; lookups run in parallel (20 threads).
+Results are read from a CSV input file and written to a CSV output file. Built-in rate limiting (400 requests/minute) prevents API throttling even when running many requests in parallel.
 
 ## Prerequisites
 
@@ -33,8 +33,10 @@ The script reads a CSV file where each row is a company to resolve. All column h
 | `isin`   | ISIN identifier (12 characters)                  |
 | `cusip`  | CUSIP identifier (9 characters)                  |
 | `sedol`  | SEDOL identifier (7 characters)                  |
-| `mic`    | Market Identifier Code (e.g. `XNAS`)             |
-| `ticker` | Ticker symbol (e.g. `AAPL`)                      |
+| `mic`    | Market Identifier Code -- used together with `ticker` (e.g. `XNAS`) |
+| `ticker` | Ticker symbol -- used together with `mic` (e.g. `AAPL`) |
+
+> **Note:** `mic` and `ticker` must both be provided to use the listing identifier. If only one of the two is present, the row will not be resolved via MIC:ticker.
 
 At least one identifier per row is needed for resolution. When multiple are present the script tries them in priority order: **ISIN > CUSIP > SEDOL > MIC:ticker**. Once a company is resolved by a higher-priority identifier, lower ones are skipped.
 
