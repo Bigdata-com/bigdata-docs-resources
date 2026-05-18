@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 MAX_REQUESTS_PER_MINUTE = 400
 RATE_LIMIT_WINDOW = 60
-RATE_LIMIT_COOLDOWN = 20
+RATE_LIMIT_COOLDOWN = 5
 
 
 class RateLimiter:

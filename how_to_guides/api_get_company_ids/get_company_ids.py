@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import csv, os, sys
 from typing import NamedTuple
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from dotenv import load_dotenv
 from logging_config import setup_logging
@@ -14,6 +14,8 @@ logger = setup_logging()
 API_KEY = os.getenv("BIGDATA_API_KEY")
 BASE_URL = "https://api.bigdata.com/v1/knowledge-graph/companies"
 PUBLIC_COMPANY_CHUNK_SIZE = 500
+# Only used for private company resolution, since that API accepts only one company per request
+MAX_WORKERS = 5
 HEADERS = {"Content-Type": "application/json", "x-api-key": API_KEY}
 rate_limiter = RateLimiter()
 
@@ -118,7 +120,12 @@ def resolve_public(csv_path: str) -> list[dict[str, str]]:
                     industry=info["industry"], description=info["description"],
                 )
                 resolved_indices.add(idx)
-        logger.info(f"{ident.validation_type}: resolved {len(resolved_indices)}/{len(companies)} total")
+                c = companies[idx]
+                logger.info(
+                    f"Row {idx + 2}: resolved via {ident.validation_type} "
+                    f"{value!r} -> {info['id']} ({c.get('name', '') or 'no name'})"
+                )
+        logger.debug(f"{ident.validation_type}: resolved {len(resolved_indices)}/{len(companies)} total")
 
     # Step 3: Return in original order
     return [companies[idx] for idx in sorted(companies)]
@@ -141,15 +148,25 @@ def _resolve_one_private(company: dict[str, str]) -> dict[str, str] | None:
 
 def resolve_private(csv_path: str) -> list[dict[str, str]]:
     companies = _read_csv(csv_path, PRIVATE_INPUT_FIELDS)
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        results = list(executor.map(_resolve_one_private, companies))
-    for company, info in zip(companies, results):
-        if info:
-            company.update(
-                ravenpack_id=info["id"], country=info["country"],
-                industry=info["industry"], description=info["description"],
-            )
-            logger.info(f"Found PRIVATE {company.get('name', '')} -> {info['id']}")
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_company = {
+            executor.submit(_resolve_one_private, company): company for company in companies
+        }
+        for fut in as_completed(future_to_company):
+            company = future_to_company[fut]
+            try:
+                info = fut.result()
+            except Exception as exc:
+                logger.error(
+                    f"Private lookup failed for {company.get('name', company.get('webpage', '?'))!r}: {exc}"
+                )
+                info = None
+            if info:
+                company.update(
+                    ravenpack_id=info["id"], country=info["country"],
+                    industry=info["industry"], description=info["description"],
+                )
+                logger.info(f"Found PRIVATE {company.get('name', '')} -> {info['id']}")
     return companies
 
 

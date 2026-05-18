@@ -13,5 +13,10 @@ venv/
 .env
 **/.env
 
+
+# Logs
+logs/
+**/logs/
+
 # Python bytecode (get_company_ids)
 **/**/__pycache__/

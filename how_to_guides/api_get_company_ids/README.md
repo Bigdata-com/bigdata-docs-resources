@@ -6,8 +6,8 @@ Every company in the Bigdata.com knowledge graph has a unique `ravenpack_id`. Be
 
 The Bigdata.com API exposes entity resolution as a simple REST endpoint. A single call can resolve one identifier, but real workflows rarely deal with just one company. This script lets you resolve entire portfolios from a CSV file, using whatever identifiers you have on hand:
 
-- **Public companies** — Resolve by any market identifier you have: ISIN, CUSIP, SEDOL, or a MIC + ticker pair (e.g. `XNAS:AAPL`). Mix and match freely across rows — have ISINs for some holdings and SEDOLs for others? Just fill in what you have.
-- **Private companies** — Resolve by webpage URL or company name. Have the company's website? That gives the most accurate match. Only have the name? That works too.
+- **Public companies**: Resolve by any market identifier: ISIN, CUSIP, SEDOL, or a MIC + ticker pair (e.g. `XNAS:AAPL`). Mix and match freely across rows — have ISINs for some holdings and SEDOLs for others? Just fill in what you have.
+- **Private companies**: Resolve by webpage URL or company name. Have the company's website? That gives the most accurate match. Only have the name? That works too.
 
 The script handles the rest:
 
