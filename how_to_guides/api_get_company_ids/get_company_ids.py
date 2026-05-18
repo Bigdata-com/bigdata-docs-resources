@@ -125,7 +125,7 @@ def resolve_public(csv_path: str) -> list[dict[str, str]]:
                     f"Row {idx + 2}: resolved via {ident.validation_type} "
                     f"{value!r} -> {info['id']} ({c.get('name', '') or 'no name'})"
                 )
-        logger.debug(f"{ident.validation_type}: resolved {len(resolved_indices)}/{len(companies)} total")
+        logger.info(f"{ident.validation_type}: resolved {len(resolved_indices)}/{len(companies)} total")
 
     # Step 3: Return in original order
     return [companies[idx] for idx in sorted(companies)]
@@ -154,13 +154,7 @@ def resolve_private(csv_path: str) -> list[dict[str, str]]:
         }
         for fut in as_completed(future_to_company):
             company = future_to_company[fut]
-            try:
-                info = fut.result()
-            except Exception as exc:
-                logger.error(
-                    f"Private lookup failed for {company.get('name', company.get('webpage', '?'))!r}: {exc}"
-                )
-                info = None
+            info = fut.result()
             if info:
                 company.update(
                     ravenpack_id=info["id"], country=info["country"],
