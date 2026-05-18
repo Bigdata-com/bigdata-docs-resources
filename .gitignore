@@ -1,4 +1,6 @@
 .DS_STORE
+.idea
+.vscode/
 
 # Virtual environments
 .venv/
@@ -11,3 +13,11 @@ venv/
 # Environment variables
 .env
 **/.env
+
+
+# Logs
+logs/
+**/logs/
+
+# Python bytecode (get_company_ids)
+**/**/__pycache__/
