@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NVIDIA's Quantum Computing Strategy and Timeline</title>
+<style>
+  @page { size: Letter; margin: 0.85in 0.85in 1in 0.85in; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.55;
+    font-size: 11pt;
+  }
+  .cover {
+    border-bottom: 4px solid #76b900;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+  }
+  .eyebrow {
+    color: #76b900;
+    font-size: 10pt;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+  }
+  h1 {
+    font-size: 24pt;
+    margin: 0 0 6px 0;
+    color: #111;
+    line-height: 1.2;
+  }
+  .subtitle {
+    font-size: 12pt;
+    color: #444;
+    margin: 0;
+  }
+  .meta {
+    font-size: 9.5pt;
+    color: #666;
+    margin-top: 10px;
+  }
+  .meta a { color: #76b900; text-decoration: none; }
+  h2 {
+    font-size: 15pt;
+    color: #111;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #e2e2e2;
+    padding-bottom: 4px;
+  }
+  h3 {
+    font-size: 12pt;
+    color: #222;
+    margin-top: 18px;
+    margin-bottom: 6px;
+  }
+  p { margin: 6px 0 10px 0; }
+  ul { margin: 4px 0 12px 0; padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .callout {
+    background: #f4f9ec;
+    border-left: 4px solid #76b900;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 10.5pt;
+  }
+  .timeline {
+    border-left: 2px solid #76b900;
+    margin: 14px 0 18px 8px;
+    padding-left: 16px;
+  }
+  .timeline .event { margin-bottom: 12px; }
+  .timeline .date {
+    color: #76b900;
+    font-weight: 700;
+    font-size: 10.5pt;
+    display: block;
+  }
+  .timeline .label {
+    font-weight: 600;
+    color: #111;
+  }
+  a.cite {
+    color: #2a6f97;
+    text-decoration: none;
+    font-size: 9.5pt;
+  }
+  a.cite:hover { text-decoration: underline; }
+  .sources h2 { margin-top: 28px; }
+  .sources ol { font-size: 9.5pt; padding-left: 22px; }
+  .sources li { margin-bottom: 5px; }
+  .sources a { color: #2a6f97; word-break: break-all; }
+  .footer-note {
+    margin-top: 24px;
+    font-size: 9pt;
+    color: #777;
+    border-top: 1px solid #e2e2e2;
+    padding-top: 10px;
+  }
+  table.summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px 0;
+    font-size: 10pt;
+  }
+  table.summary th, table.summary td {
+    border: 1px solid #ddd;
+    padding: 6px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.summary th {
+    background: #f4f9ec;
+    color: #1a1a1a;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <p class="eyebrow">Bigdata.com Research Brief &nbsp;|&nbsp; Technology / Semiconductors</p>
+  <h1>NVIDIA's Embrace of Quantum Computing</h1>
+  <p class="subtitle">Strategy, key products, partnerships, and a recalibrated timeline</p>
+  <p class="meta">
+    Published: May 21, 2026 &nbsp;·&nbsp; Subject: NVIDIA Corp. (NASDAQ: NVDA) &nbsp;·&nbsp;
+    Data &amp; sourcing: <a href="https://bigdata.com">Bigdata.com</a>
+  </p>
+</div>
+
+<h2>Executive Summary</h2>
+<p>
+  NVIDIA is not building a quantum processing unit (QPU). Instead, it is positioning itself as
+  the <em>classical-compute backbone</em> of an emerging hybrid quantum-classical era — supplying
+  the GPUs, software (CUDA-Q), interconnect (NVQLink), AI calibration/error-correction models
+  (Ising), and venture capital (NVentures) that quantum hardware companies plug into
+  <a class="cite" href="https://app.bigdata.com/documents/6722623CFE6C21EDFBD247AEC59D87DC">(The Globe And Mail – Apr 27, 2026)</a>.
+  CEO Jensen Huang has materially walked back his early-2025 "15 to 30 years away" comment,
+  declaring in mid-2025 that quantum is at an "inflection point"
+  <a class="cite" href="https://app.bigdata.com/documents/CEDD12DF15387F26BC69C50FA07B5FFB">(AOL.com – Sep 5, 2025)</a>,
+  and in April 2026 launching Ising — open-source AI models for quantum error correction
+  <a class="cite" href="https://app.bigdata.com/documents/2CD486FE0353728C9654E9809AD164FC">(Yahoo! Finance – Apr 14, 2026)</a>.
+</p>
+
+<div class="callout">
+  <strong>Key takeaway:</strong> NVIDIA's strategy is to be "the brains" of every quantum
+  computer rather than to build one. Huang in 2024: "You can't just program a quantum computer
+  all by itself. You need to have classical computing sitting next to it"
+  <a class="cite" href="https://app.bigdata.com/documents/ED96B98677C7968FFDA310FBC8FFEF37">(Yahoo! Finance – May 4, 2026)</a>.
+</div>
+
+<h2>1. The Strategic Posture: Hybrid, Not Head-to-Head</h2>
+
+<p>
+  NVIDIA has been explicit with investors that it is <strong>not pursuing a QPU</strong> to
+  compete with IonQ, Rigetti, D-Wave, Quantinuum, or others. Its bet is that the practically
+  useful quantum era will be hybrid — a quantum processor handling specific problem classes,
+  paired with classical GPU clusters handling training, inference, calibration, decoding, and
+  general workload orchestration
+  <a class="cite" href="https://app.bigdata.com/documents/A37F688AC13B8E67B07C2AF2D536206E">(AOL.com – May 18, 2026)</a>.
+</p>
+
+<p>
+  Three structural advantages flow from this stance:
+</p>
+<ul>
+  <li><strong>Optionality:</strong> If quantum stalls, NVIDIA's accelerated-compute business is unaffected; if quantum succeeds, NVIDIA is the indispensable classical layer
+    <a class="cite" href="https://app.bigdata.com/documents/6722623CFE6C21EDFBD247AEC59D87DC">(The Globe And Mail – Apr 27, 2026)</a>.</li>
+  <li><strong>CUDA lock-in extended:</strong> Anchoring Ising to NVIDIA GPUs and CUDA-Q "ensures that advances in quantum capabilities fuel further demand for its GPU architectures and data center services"
+    <a class="cite" href="https://app.bigdata.com/documents/B324FDC09E1FEE83B613B42A5657349F">(The Globe And Mail – May 17, 2026)</a>.</li>
+  <li><strong>Neutral partner:</strong> By not building a QPU, NVIDIA can partner across all qubit modalities (trapped-ion, superconducting, neutral-atom, photonic), making it a default vendor for every quantum roadmap.</li>
+</ul>
+
+<h2>2. The Product Stack: How NVIDIA Plugs Into Quantum</h2>
+
+<table class="summary">
+  <thead>
+    <tr><th>Component</th><th>What it does</th><th>Status / Launch</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>CUDA-Q</strong></td>
+      <td>Open-source hybrid quantum-classical programming platform; an extension of CUDA. Lets quantum hardware and classical GPU code interoperate.</td>
+      <td>Rolled out in 2022 (originally "CUDA Quantum"); active partners include IonQ and Rigetti
+        <a class="cite" href="https://app.bigdata.com/documents/5576ED2EA3D883D61F2A929EF368B92F">(Nasdaq – May 4, 2026)</a>.</td>
+    </tr>
+    <tr>
+      <td><strong>NVQLink</strong></td>
+      <td>Interconnect that lets quantum processors plug directly into NVIDIA GPU-based supercomputing networks.</td>
+      <td>Live; used by IonQ and South Korea's KISTI to integrate trapped-ion hardware with GPU supercomputers (announced March 2026)
+        <a class="cite" href="https://app.bigdata.com/documents/1E5D36F90615123ADAF8A772E33BDF81">(The Globe And Mail – May 6, 2026)</a>.</td>
+    </tr>
+    <tr>
+      <td><strong>Ising (AI models)</strong></td>
+      <td>Open-source family of AI models for processor calibration and real-time quantum error-correction decoding. Up to 2.5× faster and 3× more accurate than PyMatching.</td>
+      <td>Launched April 14, 2026 on "World Quantum Day"
+        <a class="cite" href="https://app.bigdata.com/documents/2CD486FE0353728C9654E9809AD164FC">(Yahoo! Finance – Apr 14, 2026)</a>.</td>
+    </tr>
+    <tr>
+      <td><strong>Accelerated Quantum Research Center</strong></td>
+      <td>NVIDIA-led research center co-founded with quantum partners to advance error-correction, algorithms, and hybrid system design.</td>
+      <td>Quantinuum is a founding partner
+        <a class="cite" href="https://app.bigdata.com/documents/484E473A9FC291350C16E095819F6435">(Nasdaq – Sep 9, 2025)</a>.</td>
+    </tr>
+    <tr>
+      <td><strong>NVentures investment</strong></td>
+      <td>NVIDIA's venture arm — directly funds quantum hardware companies that build on the NVIDIA stack.</td>
+      <td>Participated in Quantinuum's ~$600M round at a $10B pre-money valuation (Sep 4, 2025)
+        <a class="cite" href="https://app.bigdata.com/documents/484E473A9FC291350C16E095819F6435">(Nasdaq – Sep 9, 2025)</a>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.1 Ising in detail</h3>
+<p>
+  Ising is the most consequential recent move. The models address quantum computing's two biggest
+  practical obstacles: <strong>qubit calibration</strong> (formerly a multi-day manual task,
+  now reduced to hours) and <strong>real-time error correction</strong>
+  <a class="cite" href="https://app.bigdata.com/documents/B324FDC09E1FEE83B613B42A5657349F">(The Globe And Mail – May 17, 2026)</a>.
+  Huang framed the launch as: "AI is essential to making quantum computing practical. With Ising,
+  AI becomes the control plane — the operating system of quantum machines"
+  <a class="cite" href="https://app.bigdata.com/documents/C1276E958B697054746A762509AF0E5E">(CNBC – Apr 16, 2026)</a>.
+  Early adopters include Harvard, Fermilab, Lawrence Berkeley National Laboratory, and several
+  commercial quantum vendors
+  <a class="cite" href="https://app.bigdata.com/documents/E31DCC88EA5E9E0EE2B690BE056BC73D">(News Break – Apr 15, 2026)</a>.
+</p>
+
+<h2>3. Partnership Ecosystem</h2>
+<ul>
+  <li><strong>Quantinuum (Honeywell):</strong> NVentures led participation in Quantinuum's ~$600M raise at $10B pre-money in September 2025; Quantinuum is a founding partner of NVIDIA's Accelerated Quantum Research Center and is preparing to launch its next-generation Helios system in late 2025
+    <a class="cite" href="https://app.bigdata.com/documents/484E473A9FC291350C16E095819F6435">(Nasdaq – Sep 9, 2025)</a>.</li>
+  <li><strong>IonQ:</strong> Active CUDA-Q partner; cited as early Ising user; integrated with NVIDIA GPU supercomputers via NVQLink (with South Korea's KISTI, March 2026)
+    <a class="cite" href="https://app.bigdata.com/documents/1E5D36F90615123ADAF8A772E33BDF81">(The Globe And Mail – May 6, 2026)</a>.</li>
+  <li><strong>Rigetti Computing:</strong> CUDA-Q partner; on its Q1 FY2026 earnings call, management said it is actively evaluating Ising for calibration and error correction alongside its UK partnership with Riverlane
+    <a class="cite" href="https://app.bigdata.com/documents/83ECA50FF72E9E996BA17C05D49BBE59">(Rigetti Q1 2026 Earnings Call – May 11, 2026)</a>.</li>
+  <li><strong>NVIDIA GTC 2025 "Quantum Day":</strong> Huang shared the stage with executives from Alice &amp; Bob, Atom Computing, D-Wave, Infleqtion, IonQ, Pasqal, PsiQuantum, Quantinuum, Quantum Circuits, QuEra, Rigetti, and SEEQC — a near-comprehensive industry roster
+    <a class="cite" href="https://app.bigdata.com/documents/A7AD8799EB4FF42F9128EDB78B8FCEFE">(HPC Wire – Jan 14, 2025)</a>.</li>
+</ul>
+
+<h2>4. Timeline of NVIDIA's Quantum Push</h2>
+
+<div class="timeline">
+  <div class="event">
+    <span class="date">2022</span>
+    <span class="label">CUDA-Q launched.</span> NVIDIA's hybrid quantum-classical programming platform (initially "CUDA Quantum") debuts at Viva Tech, marking NVIDIA's first major productized quantum effort
+    <a class="cite" href="https://app.bigdata.com/documents/6291D816689EEF0C72B1DC003C9D6B16">(PYMNTS.com – Jun 11, 2025)</a>.
+  </div>
+  <div class="event">
+    <span class="date">January 2025</span>
+    <span class="label">"15 to 30 years away" comment.</span> At CES, Huang says "very useful" quantum computers are 15–30 years out; IonQ falls 39% and Rigetti 45% in a single day
+    <a class="cite" href="https://app.bigdata.com/documents/D7C132470325F8A0C363A9B5F39B342E">(The Globe And Mail – May 4, 2026)</a>.
+  </div>
+  <div class="event">
+    <span class="date">March 2025</span>
+    <span class="label">NVIDIA "Quantum Day" at GTC 2025.</span> Huang convenes 12 quantum hardware companies on stage — a clear signal that NVIDIA wants to be the industry's classical-compute partner
+    <a class="cite" href="https://app.bigdata.com/documents/A7AD8799EB4FF42F9128EDB78B8FCEFE">(HPC Wire – Jan 14, 2025)</a>.
+  </div>
+  <div class="event">
+    <span class="date">June 2025</span>
+    <span class="label">Huang reverses tone.</span> At VivaTech, Huang says quantum is at an "inflection point" for practical applications — a sharp pivot from his January remarks
+    <a class="cite" href="https://app.bigdata.com/documents/6291D816689EEF0C72B1DC003C9D6B16">(PYMNTS.com – Jun 11, 2025)</a>.
+  </div>
+  <div class="event">
+    <span class="date">September 4, 2025</span>
+    <span class="label">~$600M NVentures investment in Quantinuum.</span> Quantinuum raises at a $10B pre-money valuation (double its $5B valuation from Jan 2024); NVIDIA's first major direct capital commitment to a quantum hardware company
+    <a class="cite" href="https://app.bigdata.com/documents/CEDD12DF15387F26BC69C50FA07B5FFB">(AOL.com – Sep 5, 2025)</a>.
+  </div>
+  <div class="event">
+    <span class="date">March 2026</span>
+    <span class="label">IonQ × KISTI NVQLink integration.</span> Trapped-ion quantum hardware connected to GPU-based supercomputers in South Korea — the first major sovereign deployment of NVQLink
+    <a class="cite" href="https://app.bigdata.com/documents/1E5D36F90615123ADAF8A772E33BDF81">(The Globe And Mail – May 6, 2026)</a>.
+  </div>
+  <div class="event">
+    <span class="date">April 14, 2026 (World Quantum Day)</span>
+    <span class="label">Ising launched.</span> Open-source AI models for calibration and error correction; 2.5× faster and 3× more accurate decoding vs. PyMatching
+    <a class="cite" href="https://app.bigdata.com/documents/2CD486FE0353728C9654E9809AD164FC">(Yahoo! Finance – Apr 14, 2026)</a>.
+  </div>
+  <div class="event">
+    <span class="date">May 20, 2026</span>
+    <span class="label">Q1 FY2027 earnings.</span> NVIDIA reiterates Ising as part of its open AI model lineup alongside Nemotron and BioNeMo, signaling Ising is now a permanent pillar of the platform
+    <a class="cite" href="https://app.bigdata.com/documents/9F3238B8D1F3FC3506B30D921952FC5C">(Market Screener / NVIDIA press – May 20, 2026)</a>.
+  </div>
+  <div class="event">
+    <span class="date">Late 2025 / 2026 (in flight)</span>
+    <span class="label">Quantinuum "Helios" launch &amp; fault-tolerant roadmap.</span> Funded in part by NVIDIA, Quantinuum is targeting universal, fault-tolerant systems with Helios as its next-gen platform
+    <a class="cite" href="https://app.bigdata.com/documents/484E473A9FC291350C16E095819F6435">(Nasdaq – Sep 9, 2025)</a>.
+  </div>
+</div>
+
+<h2>5. The Revised Timeline for "Useful" Quantum</h2>
+<p>
+  When industry experts were surveyed in 2025, the consensus was that meaningful quantum utility
+  is "at most ten years away" — a horizon that, notably, has not shifted much in a decade.
+  Google's CEO has pegged it at 5–10 years; Huang remains the most conservative of the
+  hyperscaler CEOs at "at least fifteen"
+  <a class="cite" href="https://app.bigdata.com/documents/EFFA1236DD415AB9F05A93878F551970">(TNW – May 9, 2026)</a>.
+  NVIDIA's own behavior, however, tells a different story: it is investing capital, shipping
+  products, and signing partnerships consistent with a much nearer-term "inflection point"
+  view
+  <a class="cite" href="https://app.bigdata.com/documents/CEDD12DF15387F26BC69C50FA07B5FFB">(AOL.com – Sep 5, 2025)</a>.
+</p>
+
+<div class="callout">
+  <strong>The Resonance forecast NVIDIA itself cites:</strong> the quantum computing market is
+  expected to surpass <strong>$11 billion by 2030</strong>, contingent on continued progress
+  in error correction and scalability — precisely the bottlenecks Ising targets
+  <a class="cite" href="https://app.bigdata.com/documents/2CD486FE0353728C9654E9809AD164FC">(Yahoo! Finance – Apr 14, 2026)</a>.
+</div>
+
+<h2>6. Risks and What to Watch</h2>
+<ul>
+  <li><strong>Modality risk:</strong> NVQLink and Ising must remain hardware-agnostic across trapped-ion, superconducting, neutral-atom, and photonic qubits — a real engineering burden.</li>
+  <li><strong>Hyperscaler in-housing:</strong> Alphabet, IBM, Microsoft, and Amazon are all developing internal quantum stacks; if hybrid orchestration becomes commoditized, NVIDIA's value capture narrows.</li>
+  <li><strong>Timeline uncertainty:</strong> Huang's "at least 15 years" comment for fully useful quantum suggests NVIDIA itself does not expect material quantum revenue this decade — the addressable market remains modest in the near term
+    <a class="cite" href="https://app.bigdata.com/documents/D09653D343E98EFD3CAB6C2CD57C499E">(Nasdaq – May 17, 2026)</a>.</li>
+  <li><strong>Direct competition:</strong> D-Wave CEO Alan Baratz publicly challenged NVIDIA in April 2026: "If I was NVIDIA, I'd be shaking in my boots" — a reminder that quantum vendors may eventually compete with classical accelerators on workload share
+    <a class="cite" href="https://app.bigdata.com/documents/7B7BB022C801259D35408C7876AD21F2">(The Globe And Mail – Apr 17, 2026)</a>.</li>
+</ul>
+
+<h2>7. Bottom Line</h2>
+<p>
+  NVIDIA's quantum plan is structurally identical to its AI plan: own the developer platform
+  (CUDA-Q), own the interconnect (NVQLink), own the system software (Ising), and ensure every
+  serious quantum hardware vendor runs on NVIDIA infrastructure. The timeline NVIDIA <em>says</em>
+  it expects (15+ years to "useful" quantum) is materially longer than the timeline its
+  <em>actions</em> imply (a productized, commercially supported quantum stack shipping in 2026).
+  For investors, that gap is the most informative signal in the file.
+</p>
+
+<div class="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li>NVIDIA — <a href="https://app.bigdata.com/documents/2CD486FE0353728C9654E9809AD164FC">"NVIDIA Launches Ising, the World's First Open AI Models to Accelerate the Path to Useful Quantum Computers"</a>, Yahoo! Finance, Apr 14, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/C1276E958B697054746A762509AF0E5E">"Quantum stocks on pace for a massive week after Nvidia debuts AI models to boost the tech"</a>, CNBC, Apr 16, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/E31DCC88EA5E9E0EE2B690BE056BC73D">"Errors and scale: Nvidia unveils Ising, world's first AI models tackling quantum barriers"</a>, News Break, Apr 15, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/6722623CFE6C21EDFBD247AEC59D87DC">"Nvidia Just Announced a Major Quantum Computing Development"</a>, The Globe And Mail, Apr 27, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/D7C132470325F8A0C363A9B5F39B342E">"Nvidia Just Stunned the Quantum Computing Market. What Does This Mean for IonQ, D-Wave, and Rigetti?"</a>, The Globe And Mail, May 4, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/ED96B98677C7968FFDA310FBC8FFEF37">"Nvidia Just Stunned the Quantum Computing Market…"</a>, Yahoo! Finance, May 4, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/B324FDC09E1FEE83B613B42A5657349F">"Prediction: This Quantum Computing Stock Will Be Up More Than 20% by the End of 2026"</a>, The Globe And Mail, May 17, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/D09653D343E98EFD3CAB6C2CD57C499E">"Prediction: This Quantum Computing Stock Will Be Up More Than 20% by the End of 2026"</a>, Nasdaq, May 17, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/1E5D36F90615123ADAF8A772E33BDF81">"The Hidden Quantum Computing Play Inside Nvidia's AI Strategy That Most Investors Are Missing"</a>, The Globe And Mail, May 6, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/484E473A9FC291350C16E095819F6435">"Quantum Pact: NVIDIA, Honeywell Raise Stakes for IonQ, Rigetti, D-Wave"</a>, Nasdaq, Sep 9, 2025.</li>
+    <li><a href="https://app.bigdata.com/documents/CEDD12DF15387F26BC69C50FA07B5FFB">"Nvidia's $600 Million Quantum Computing Bet…"</a>, AOL.com, Sep 5, 2025.</li>
+    <li><a href="https://app.bigdata.com/documents/6291D816689EEF0C72B1DC003C9D6B16">"Nvidia CEO Sees Quantum Computing Reaching 'Inflection Point'"</a>, PYMNTS.com, Jun 11, 2025.</li>
+    <li><a href="https://app.bigdata.com/documents/A7AD8799EB4FF42F9128EDB78B8FCEFE">"NVIDIA Announces Quantum Day at GTC 2025, Featuring Top Computing Leaders"</a>, HPC Wire, Jan 14, 2025.</li>
+    <li><a href="https://app.bigdata.com/documents/A37F688AC13B8E67B07C2AF2D536206E">"3 Quantum Computing Stocks to Buy Right Now"</a>, AOL.com, May 18, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/5576ED2EA3D883D61F2A929EF368B92F">"Nvidia Just Stunned the Quantum Computing Market…"</a>, Nasdaq, May 4, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/83ECA50FF72E9E996BA17C05D49BBE59">"Rigetti (RGTI) Q1 2026 Earnings Call Transcript"</a>, The Globe And Mail, May 11, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/9F3238B8D1F3FC3506B30D921952FC5C">"NVIDIA Announces Financial Results for First Quarter Fiscal 2027"</a>, Market Screener, May 20, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/EFFA1236DD415AB9F05A93878F551970">"Quantinuum filed for an IPO worth 20 billion dollars…"</a>, TNW, May 9, 2026.</li>
+    <li><a href="https://app.bigdata.com/documents/7B7BB022C801259D35408C7876AD21F2">"Here's Why D-Wave Quantum Stock Soared This Week"</a>, The Globe And Mail, Apr 17, 2026.</li>
+  </ol>
+</div>
+
+<p class="footer-note">
+  Data &amp; content retrieved via the <a href="https://bigdata.com">Bigdata.com</a> MCP service.
+  All quotations and figures attributed inline. This brief is for informational purposes only and
+  is not investment advice.
+</p>
+
+</body>
+</html>
