@@ -185,10 +185,10 @@ def main() -> None:
     if mode == "public":
         companies = resolve_public(csv_path)
         output_fields = ["name", "mic", "ticker", "isin", "cusip", "sedol",
-                         "ravenpack_id", "country", "industry", "description"]
+                         "ravenpack_id", "country", "industry"]
     else:
         companies = resolve_private(csv_path)
-        output_fields = ["name", "webpage", "ravenpack_id", "country", "industry", "description"]
+        output_fields = ["name", "webpage", "ravenpack_id", "country", "industry"]
 
     output_path = f"output/{mode}_company_ids.csv"
     write_csv(companies=companies, path=output_path, output_fields=output_fields)

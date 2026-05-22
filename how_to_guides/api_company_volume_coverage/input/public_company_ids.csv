@@ -1,0 +1,7 @@
+name,mic,ticker,isin,cusip,sedol,ravenpack_id,country,industry
+Micron Technology Inc.,,,US5951121038,,,49BBBC,US,Semiconductors
+NVIDIA Corporation,,,,,2379504,E09E2B,US,Semiconductors
+Figma Inc.,,,,316841105,,BA9E0C,US,Internet Services
+Microsoft Corporation,XNAS,MSFT,,,,228D42,US,Software
+Netflix Inc.,,,US64110L1061,,,ECD263,US,Broadcasting
+Apple Inc.,XNAS,AAPL,US0378331005,,,D8442A,US,Computer Hardware
