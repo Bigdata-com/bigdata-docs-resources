@@ -19,7 +19,7 @@ The script handles the rest:
 
 ## Prerequisites
 
-- Python 3.7+
+- Python 3.10+
 - Install dependencies:
   ```bash
   pip install -r requirements.txt

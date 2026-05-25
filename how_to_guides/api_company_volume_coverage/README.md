@@ -20,7 +20,7 @@ The script handles the rest:
 
 ## Prerequisites
 
-- Python 3.7+
+- Python 3.10+
 - Install dependencies:
   ```bash
   pip install -r requirements.txt
@@ -44,8 +44,8 @@ Example:
 
 ```csv
 name,ravenpack_id
-Apple Inc.,4A6F00
-NVIDIA Corporation,52258B
+Apple Inc.,D8442A
+NVIDIA Corporation,E09E2B
 ```
 
 ## Usage
