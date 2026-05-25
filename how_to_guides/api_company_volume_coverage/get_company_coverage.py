@@ -42,11 +42,11 @@ def _read_csv(path: str) -> tuple[list[str], list[dict[str, str]]]:
     """Read a CSV preserving column order. Validate required headers are present."""
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        headers = [h.strip() for h in (reader.fieldnames or [])]
-        missing = REQUIRED_INPUT_FIELDS - {h.lower() for h in headers}
+        headers = [h.strip().lower() for h in (reader.fieldnames or [])]
+        missing = REQUIRED_INPUT_FIELDS - set(headers)
         if missing:
             raise SystemExit(f"CSV missing required columns: {', '.join(sorted(missing))}")
-        rows = [{k.strip(): (v or "").strip() for k, v in row.items() if k} for row in reader]
+        rows = [{k.strip().lower(): (v or "").strip() for k, v in row.items() if k} for row in reader]
     return headers, rows
 
 
@@ -103,14 +103,18 @@ def _build_payload(ravenpack_id: str, start: str, end: str) -> dict:
 
 def _fetch_volume(ravenpack_id: str, start: str, end: str) -> tuple[int, int]:
     """Return (distinct_documents, distinct_chunks) for the given window."""
-    rate_limiter.wait()
-    response = requests.post(
-        VOLUME_URL, headers=HEADERS, json=_build_payload(ravenpack_id, start, end)
-    )
-    logger.debug(f"POST {VOLUME_URL} entity={ravenpack_id} status={response.status_code}")
-    response.raise_for_status()
-    totals = (response.json().get("results") or {}).get("total") or {}
-    return int(totals.get("documents", 0)), int(totals.get("chunks", 0))
+    try:
+        rate_limiter.wait()
+        response = requests.post(
+            VOLUME_URL, headers=HEADERS, json=_build_payload(ravenpack_id, start, end)
+        )
+        logger.debug(f"POST {VOLUME_URL} entity={ravenpack_id} status={response.status_code}")
+        response.raise_for_status()
+        totals = (response.json().get("results") or {}).get("total") or {}
+        return int(totals.get("documents", 0)), int(totals.get("chunks", 0))
+    except Exception as exc:
+        logger.error(f"Volume lookup failed for {ravenpack_id}: {exc}")
+        raise
 
 
 def main() -> None:
