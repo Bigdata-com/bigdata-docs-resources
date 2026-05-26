@@ -18,7 +18,7 @@ logger = setup_logging(log_file="company_coverage.log")
 API_KEY = os.getenv("BIGDATA_API_KEY")
 VOLUME_URL = "https://api.bigdata.com/v1/search/volume"
 HEADERS = {"Content-Type": "application/json", "x-api-key": API_KEY}
-MAX_WORKERS = 5
+MAX_WORKERS = 2
 REQUIRED_INPUT_FIELDS = {"ravenpack_id"}
 
 # Each window adds two columns: distinct_documents_{label} and distinct_chunks_{label}.
