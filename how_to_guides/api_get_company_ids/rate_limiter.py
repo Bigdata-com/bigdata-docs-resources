@@ -5,7 +5,7 @@ from time import time, sleep
 
 logger = logging.getLogger(__name__)
 
-MAX_REQUESTS_PER_MINUTE = 400
+MAX_REQUESTS_PER_MINUTE = 300
 RATE_LIMIT_WINDOW = 60
 RATE_LIMIT_COOLDOWN = 5
 

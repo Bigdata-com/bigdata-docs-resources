@@ -15,7 +15,7 @@ API_KEY = os.getenv("BIGDATA_API_KEY")
 BASE_URL = "https://api.bigdata.com/v1/knowledge-graph/companies"
 PUBLIC_COMPANY_CHUNK_SIZE = 500
 # Only used for private company resolution, since that API accepts only one company per request
-MAX_WORKERS = 5
+MAX_WORKERS = 2
 HEADERS = {"Content-Type": "application/json", "x-api-key": API_KEY}
 rate_limiter = RateLimiter()
 
