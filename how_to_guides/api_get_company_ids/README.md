@@ -14,7 +14,7 @@ The script handles the rest:
 - **Tries every identifier available.** For public companies it follows a priority order (ISIN > CUSIP > SEDOL > MIC:ticker) and stops at the first match. For private companies it tries the webpage first, then falls back to the name.
 - **Validates identifiers before sending.** Malformed ISINs, CUSIPs, and SEDOLs are caught early and logged as warnings instead of wasting an API call.
 - **Batches efficiently.** Public lookups are sent in chunks of up to 500 identifiers per request, so even a large portfolio resolves in seconds.
-- **Parallelizes private lookups.** Private companies require one API call each, so the script runs 20 concurrent threads to keep things fast.
+- **Parallelizes private lookups.** Private companies require one API call each, so the script runs 3 concurrent threads to keep things fast.
 - **Respects rate limits.** A built-in limiter caps requests at 400/minute, preventing throttling even at full parallelism.
 
 ## Prerequisites
