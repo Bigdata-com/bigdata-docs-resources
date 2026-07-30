@@ -2,6 +2,9 @@
 .idea
 .vscode/
 
+# Claude Code local files
+**/.claude/
+
 # Virtual environments
 .venv/
 **/.venv/

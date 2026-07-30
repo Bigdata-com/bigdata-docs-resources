@@ -17,7 +17,17 @@ consumes, and how to turn that consumption into a cost in US dollars.
    }
    ```
 
-3. Each token type has its own price. So far, we have hardcoded the pricing in this script and in the near future, we will create an endpoint to retrieve it.
+3. Each token type has its own price. The script reads the prices currently applied to
+   your API key from `GET https://api.bigdata.com/v1/subscription/quotas`, so nothing is
+   hardcoded and the report never uses a stale price list.
+4. Each billing unit of that endpoint reports a `units_price`, the price of a **single**
+   token in US$ cents, so the cost of one token type is:
+
+   ```
+   cost_in_cents = tokens * units_price
+   ```
+
+   The total cost of the call is the sum across all token types.
 
 ## Setup
 
@@ -50,6 +60,8 @@ Options:
 | --- | --- | --- |
 | `--query` | `Analyse the impact of Chinese DUV technology into ASML, and other chipmakers` | Free text query to search for |
 | `--max-chunks` | `10` | Maximum number of chunks to retrieve |
+| `--search-mode` | `smart` | Search mode to use. Content tokens are priced per mode |
+| `--show-prices` | off | Print the price list of your subscription before searching |
 
 ## Example output
 
@@ -64,11 +76,13 @@ Usage object returned by the API
 
 Cost of this API call
 ----------------------------------------------------------------------------------------------------
-Token type                          Family                    Tokens   US$ / 1M tokens    Cost (US$)
+Prices: live prices read from https://api.bigdata.com/v1/subscription/quotas
 ----------------------------------------------------------------------------------------------------
-premium_news_tokens                 Unstructured content       1,732             96.00      0.166272
-corporate_communications_tokens     Unstructured content         445             36.00      0.016020
-web_tokens                          Unstructured content         654              8.00      0.005232
+Token type                          Price group               Tokens   US$ / 1M tokens    Cost (US$)
+----------------------------------------------------------------------------------------------------
+premium_news_tokens                 search.smart               1,732             96.00      0.166272
+corporate_communications_tokens     search.smart                 445             36.00      0.016020
+web_tokens                          search.smart                 654              8.00      0.005232
 ----------------------------------------------------------------------------------------------------
 TOTAL                                                          2,831                        0.187524
 
@@ -77,14 +91,37 @@ Total cost: 0.187524 US$ (18.7524 US$ cents)
 
 ## Price list
 
-Prices live in the `PRICING_CENTS_PER_MILLION_TOKENS` dictionary at the top of
-[monitor_api_usage_tokens.py](monitor_api_usage_tokens.py), grouped into three families:
-unstructured content, structured content and search analytics. Update that dictionary
-when prices change.
+Prices are read at run time from the subscription quotas endpoint, so there is nothing to
+keep up to date in the script. Use `--show-prices` to print the full list your key is
+billed at:
+
+```bash
+python monitor_api_usage_tokens.py --show-prices
+```
+
+The quotas endpoint identifies every billing unit with a colon separated id, which the
+script maps to the short token names used in the `usage` object:
+
+```
+search:smart:content-premium-news:tokens    ->  search.smart          premium_news_tokens
+structured-data:read:content-jobs:tokens    ->  structured-data.read  jobs_tokens
+search:comentions::tokens                   ->  search                comentions_tokens
+```
+
+The group matters because the same token type can be priced differently depending on how
+it was consumed. Content tokens are priced per search mode, so a search run in `fast` mode
+and one in `smart` mode are billed from different groups. The report shows which group
+priced each line.
+
+Units that are not billed per token (stored pages, PDF pages, ...) are ignored.
 
 Note that the number of tokens consumed depends on which content the search actually
 matches, so the same query can hit different token types (and therefore different prices)
 on different days.
+
+If the quotas endpoint cannot be reached, the script fails instead of falling back to a
+built-in price list: reporting a cost from prices that may no longer apply would be worse
+than reporting no cost at all.
 
 ## If your subscription is not billed per token
 
