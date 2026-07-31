@@ -18,8 +18,7 @@ consumes, and how to turn that consumption into a cost in US dollars.
    ```
 
 3. Each token type has its own price. The script reads the prices currently applied to
-   your API key from `GET https://api.bigdata.com/v1/subscription/quotas`, so nothing is
-   hardcoded and the report never uses a stale price list.
+   your API key from `GET https://api.bigdata.com/v1/subscription/quotas`.
 4. Each billing unit of that endpoint reports a `units_price`, the price of a **single**
    token in US$ cents, so the cost of one token type is:
 
@@ -28,6 +27,7 @@ consumes, and how to turn that consumption into a cost in US dollars.
    ```
 
    The total cost of the call is the sum across all token types.
+5. The IDs in the response of the endpoint `GET https://api.bigdata.com/v1/subscription/quotas` does not match 1:1 with the token name of the `usage` object. The function `map_unit_id` helps us map them.
 
 ## Setup
 

@@ -14,7 +14,8 @@ import os
 import json
 import logging
 import argparse
-from typing import Any, Dict, Optional, Tuple
+import textwrap
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from dotenv import load_dotenv
@@ -40,10 +41,14 @@ QUERY_UNITS_KEY = "api_query_units"
 QUERY_UNITS_DOCS_URL = "https://docs.bigdata.com/how-to-guides/monitor_usage"
 
 # Width of the report tables
-SEPARATOR = "-" * 100
+REPORT_WIDTH = 100
+SEPARATOR = "-" * REPORT_WIDTH
+
+# Indentation used to print the text of a chunk under its document
+CHUNK_INDENT = " " * 4
 
 # Example query used when none is passed on the command line
-DEFAULT_QUERY = "Analyse the impact of Chinese DUV technology into ASML, and other chipmakers"
+DEFAULT_QUERY = "Top 5 topics impacting the US financial market in the last 24 hours"
 
 if not API_KEY:
     logger.error("BIGDATA_API_KEY not found in environment variables. Please check your .env file.")
@@ -198,8 +203,8 @@ def search(query_text: str, max_chunks: int, search_mode: str) -> Dict[str, Any]
     Run a single search request against the Bigdata Search API.
 
     Args:
-        query_text: Free text query, e.g. "Analyse the impact of Chinese DUV
-                    technology into ASML, and other chipmakers"
+        query_text: Free text query, e.g. "Top 5 topics impacting the US
+                    financial market in the last 24 hours"
         max_chunks: Maximum number of chunks to retrieve
         search_mode: Search mode to use, e.g. "smart"
 
@@ -292,6 +297,50 @@ def calculate_cost(usage: Dict[str, int],
     }
 
 
+def format_chunk_text(text: str) -> str:
+    """
+    Wrap the text of a chunk to the width of the report, keeping its own line breaks.
+
+    Args:
+        text: The "text" of a chunk, which can hold several lines of its own.
+
+    Returns:
+        The same text, indented and wrapped so it reads as a block under its document.
+    """
+    return "\n".join(
+        textwrap.fill(line, width=REPORT_WIDTH,
+                      initial_indent=CHUNK_INDENT, subsequent_indent=CHUNK_INDENT)
+        for line in text.splitlines()
+        if line.strip()
+    )
+
+
+def print_search_results(results: List[Dict[str, Any]]) -> None:
+    """
+    Print what the search returned: how many documents, and the title, the source and
+    the text of the chunks of each one.
+
+    Args:
+        results: The "results" list from the API response, one entry per document.
+    """
+    print("\nSearch results")
+    print(SEPARATOR)
+    print(f"Number of documents returned: {len(results)}")
+
+    for document in results:
+        chunks = document.get("chunks", [])
+        source = document.get("source") or {}
+
+        print()
+        print(f"Title:  {document.get('headline', '')}")
+        print(f"Source: {source.get('name', '')}")
+        print(f"Chunks: {len(chunks)}")
+
+        for chunk in chunks:
+            print(f"\n  Chunk {chunk.get('cnum', '')}:")
+            print(format_chunk_text(chunk.get("text", "")))
+
+
 def print_report(usage: Dict[str, int], cost: Dict[str, Any], price_source: str) -> None:
     """Print the usage object and the resulting cost breakdown."""
     print("\nUsage object returned by the API")
@@ -314,8 +363,7 @@ def print_report(usage: Dict[str, int], cost: Dict[str, Any], price_source: str)
         print(SEPARATOR)
         print(f"{'TOTAL':<58}{cost['total_tokens']:>10,}{'':>18}"
               f"{cost['total_cost_dollars']:>14.6f}")
-        print(f"\nTotal cost: {cost['total_cost_dollars']:.6f} US$ "
-              f"({cost['total_cost_cents']:.4f} US$ cents)")
+        print(f"\nTotal cost: {cost['total_cost_dollars']:.6f} US$")
     else:
         print("\nNo priced content tokens in this response.")
 
@@ -403,10 +451,11 @@ def main() -> None:
     if QUERY_UNITS_KEY in usage:
         logger.warning("This API key is metered in query units, not in content tokens")
         print_query_units_notice(usage)
-        return
+    else:
+        cost = calculate_cost(usage, resolve_prices(pricing, args.search_mode))
+        print_report(usage, cost, price_source)
 
-    cost = calculate_cost(usage, resolve_prices(pricing, args.search_mode))
-    print_report(usage, cost, price_source)
+    print_search_results(results)
 
 
 if __name__ == "__main__":
